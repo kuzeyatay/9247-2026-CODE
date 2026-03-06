@@ -24,7 +24,6 @@ import com.revrobotics.spark.SparkClosedLoopController.ArbFFUnits;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
@@ -114,7 +113,7 @@ public class ModuleIOSpark implements ModuleIO {
     turnController = turnSpark.getClosedLoopController();
 
     // Configure drive motor
-    var driveConfig = new SparkFlexConfig();
+    var driveConfig = new SparkMaxConfig();
     driveConfig
         .idleMode(IdleMode.kBrake)
         .smartCurrentLimit(driveMotorCurrentLimit)
@@ -184,7 +183,9 @@ public class ModuleIOSpark implements ModuleIO {
     tryUntilOk(
         turnSpark,
         5,
-        () -> turnEncoder.setPosition(turnAbsEncoder.getAbsolutePosition().getValueAsDouble()));
+        () ->
+            turnEncoder.setPosition(
+                turnAbsEncoder.getAbsolutePosition().getValueAsDouble() * 2.0 * Math.PI));
 
     // Create odometry queues
     timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
