@@ -14,6 +14,7 @@ import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.Logger;
 
 public final class SuperstructureCommands {
@@ -119,12 +120,11 @@ public final class SuperstructureCommands {
   private static double calculateAutoShooterRpm(Drive drive, Vision vision) {
     var robotPose = drive.getPose();
     double distanceMeters = vision.getAllowedAlignTargetDistanceMeters(robotPose);
-    double targetHeightMeters = vision.getAllowedAlignTargetHeightMeters();
+    double targetHeightMeters = FieldConstants.Hub.height;
     Logger.recordOutput("Shooter/AutoAim/HorizontalDistanceMeters", distanceMeters);
+    Logger.recordOutput("Shooter/AutoAim/TargetHeightMeters", targetHeightMeters);
 
-    if (!Double.isFinite(distanceMeters)
-        || !Double.isFinite(targetHeightMeters)
-        || distanceMeters <= 0.0) {
+    if (!Double.isFinite(distanceMeters) || distanceMeters <= 0.0) {
       Logger.recordOutput("Shooter/AutoAim/RobotRadialVelocityMps", 0.0);
       Logger.recordOutput("Shooter/AutoAim/TargetLaunchSpeedMps", 0.0);
       return ShooterConstants.spinupRpm;
@@ -167,7 +167,14 @@ public final class SuperstructureCommands {
     double wheelRps =
         compensatedLaunchSpeedMetersPerSec / (Math.PI * ShooterConstants.wheelDiameterMeters);
     double rpm = wheelRps * 60.0 * ShooterConstants.rpmCompensation;
-    double commandedRpm = MathUtil.clamp(rpm, 0.0, ShooterConstants.maxAutoRpm);
+    double dragCompensationRpm = ShooterConstants.dragRpmPerMeter * distanceMeters;
+    double commandedRpm =
+        MathUtil.clamp(
+            rpm + dragCompensationRpm + ShooterConstants.autoRpmOffset,
+            0.0,
+            ShooterConstants.maxAutoRpm);
+    Logger.recordOutput("Shooter/AutoAim/DragCompensationRpm", dragCompensationRpm);
+    Logger.recordOutput("Shooter/AutoAim/OffsetCompensationRpm", ShooterConstants.autoRpmOffset);
     Logger.recordOutput("Shooter/AutoAim/CalculatedRpmRaw", rpm);
     Logger.recordOutput("Shooter/AutoAim/CalculatedRpmCommanded", commandedRpm);
 

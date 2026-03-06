@@ -13,6 +13,7 @@ public final class ShooterConstants {
 
   public static final boolean leaderInverted = false;
   public static final boolean followerOpposeLeader = true;
+  public static final double shooterGearRatio = 24.0 / 18.0; // motor rotations per shooter rotation
   public static final int supplyCurrentLimitAmps = 50;
   public static final double simFreeSpeedRps = 110.0;
   public static final double simStallCurrentAmps = 80.0;
@@ -32,6 +33,8 @@ public final class ShooterConstants {
   public static final double wheelDiameterMeters = Units.inchesToMeters(4.0);
   public static final double gravityMetersPerSecondSquared = 9.81;
   public static final double rpmCompensation = 1.0;
+  public static final double autoRpmOffset = 500.0;
+  public static final double dragRpmPerMeter = 120.0;
   public static final double minAutoRpm = 1500.0;
   public static final double maxAutoRpm = 6500.0;
 }

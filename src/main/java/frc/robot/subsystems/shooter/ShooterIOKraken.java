@@ -57,8 +57,8 @@ public class ShooterIOKraken implements ShooterIO {
   public void updateInputs(ShooterIOInputs inputs) {
     inputs.leaderConnected = true;
     inputs.followerConnected = true;
-    inputs.leaderVelocityRps = leaderMotor.getVelocity().getValueAsDouble();
-    inputs.followerVelocityRps = followerMotor.getVelocity().getValueAsDouble();
+    inputs.leaderVelocityRps = leaderMotor.getVelocity().getValueAsDouble() / shooterGearRatio;
+    inputs.followerVelocityRps = followerMotor.getVelocity().getValueAsDouble() / shooterGearRatio;
     inputs.leaderAppliedVolts = leaderMotor.getMotorVoltage().getValueAsDouble();
     inputs.followerAppliedVolts = followerMotor.getMotorVoltage().getValueAsDouble();
     inputs.leaderCurrentAmps = leaderMotor.getStatorCurrent().getValueAsDouble();
@@ -67,6 +67,7 @@ public class ShooterIOKraken implements ShooterIO {
 
   @Override
   public void setVelocityRpm(double rpm) {
-    leaderMotor.setControl(velocityRequest.withVelocity(rpm / 60.0));
+    double motorRps = (rpm / 60.0) * shooterGearRatio;
+    leaderMotor.setControl(velocityRequest.withVelocity(motorRps));
   }
 }
