@@ -17,8 +17,8 @@ import edu.wpi.first.math.util.Units;
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 4.8;
   public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(26.5);
-  public static final double wheelBase = Units.inchesToMeters(26.5);
+  public static final double trackWidth = Units.inchesToMeters(21.75);
+  public static final double wheelBase = Units.inchesToMeters(21.75);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
@@ -29,10 +29,10 @@ public class DriveConstants {
       };
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(0.0);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(2.785);
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.640);
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(1.084);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.044);
 
   // Device CAN IDs
   // Device CAN IDs
@@ -50,10 +50,10 @@ public class DriveConstants {
 
   // FIXME
 
-  public static final int frontLeftTurnAbsId = 3;
-  public static final int backLeftTurnAbsId = 1;
-  public static final int frontRightTurnAbsId = 2;
-  public static final int backRightTurnAbsId = 0;
+  public static final int frontLeftTurnAbsId = 36;
+  public static final int backLeftTurnAbsId = 28;
+  public static final int frontRightTurnAbsId = 34;
+  public static final int backRightTurnAbsId = 21;
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
@@ -81,10 +81,10 @@ public class DriveConstants {
   public static final double driveSimKv = 0.0789;
 
   // Turn motor configuration
-  public static final boolean turnInverted = false;
+  public static final boolean turnInverted = true;
   public static final int turnMotorCurrentLimit = 20;
   public static final double turnMotorReduction = (150.0 / 7.0); // Same for every mk4 modules
-  public static final DCMotor turnGearbox = DCMotor.getNeo550(1);
+  public static final DCMotor turnGearbox = DCMotor.getNEO(1);
 
   // Turn encoder configuration
   public static final boolean turnEncoderInverted = true;

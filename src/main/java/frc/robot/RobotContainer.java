@@ -10,6 +10,10 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,6 +45,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -140,9 +145,64 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Center Collect + Return Shoot", centerCollectReturnShootAuto());
 
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  private Command centerCollectReturnShootAuto() {
+    Pose2d centerCollectPoseBlue =
+        new Pose2d(
+            new Translation2d(
+                FieldConstants.LinesVertical.center - 0.35, FieldConstants.LinesHorizontal.center),
+            Rotation2d.kZero);
+    Pose2d allianceShootPoseBlue =
+        new Pose2d(
+            new Translation2d(
+                FieldConstants.Hub.nearFace.getX() - 1.8, FieldConstants.LinesHorizontal.center),
+            Rotation2d.kZero);
+
+    return Commands.sequence(
+            Commands.deadline(
+                driveToPoseUntilReached(alliancePose(centerCollectPoseBlue), 4.0),
+                SuperstructureCommands.intake(intake, indexer)),
+            Commands.deadline(
+                driveToPoseUntilReached(alliancePose(allianceShootPoseBlue), 3.5),
+                SuperstructureCommands.intake(intake, indexer)),
+            Commands.waitSeconds(0.15),
+            SuperstructureCommands.shootTimed(shooter, indexer, 0.8).withTimeout(2.2))
+        .finallyDo((interrupted) -> drive.stop());
+  }
+
+  private Command driveToPoseUntilReached(Pose2d targetPose, double timeoutSeconds) {
+    return DriveCommands.driveToPose(drive, targetPose)
+        .until(() -> atPose(targetPose, 0.20, 8.0))
+        .withTimeout(timeoutSeconds)
+        .andThen(Commands.runOnce(drive::stop, drive));
+  }
+
+  private boolean atPose(
+      Pose2d targetPose, double translationToleranceMeters, double angleToleranceDeg) {
+    Pose2d currentPose = drive.getPose();
+    double translationErrorMeters =
+        currentPose.getTranslation().getDistance(targetPose.getTranslation());
+    double headingErrorDeg =
+        Units.radiansToDegrees(
+            Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians()));
+    return translationErrorMeters <= translationToleranceMeters
+        && headingErrorDeg <= angleToleranceDeg;
+  }
+
+  private Pose2d alliancePose(Pose2d bluePose) {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) != Alliance.Red) {
+      return bluePose;
+    }
+
+    return new Pose2d(
+        FieldConstants.fieldLength - bluePose.getX(),
+        bluePose.getY(),
+        Rotation2d.fromRadians(Math.PI - bluePose.getRotation().getRadians()));
   }
 
   /**
@@ -198,6 +258,11 @@ public class RobotContainer {
                   }
                   return drive.getRotation();
                 }));
+
+    controller
+        .leftBumper()
+        .whileTrue(
+            DriveCommands.driveToPose(drive, new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(-180.0))));
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));

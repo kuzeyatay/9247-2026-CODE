@@ -111,7 +111,15 @@ public class ModuleIOSpark implements ModuleIO {
     turnEncoder = turnSpark.getEncoder();
     driveController = driveSpark.getClosedLoopController();
     turnController = turnSpark.getClosedLoopController();
+    // Configure the CANCoder
+    CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
+    cancoderConfig.MagnetSensor.MagnetOffset = 0.0;
+    cancoderConfig.MagnetSensor.SensorDirection =
+        turnAbsInverted
+            ? SensorDirectionValue.Clockwise_Positive
+            : SensorDirectionValue.CounterClockwise_Positive;
 
+    turnAbsEncoder.getConfigurator().apply(cancoderConfig);
     // Configure drive motor
     var driveConfig = new SparkMaxConfig();
     driveConfig
@@ -201,15 +209,6 @@ public class ModuleIOSpark implements ModuleIO {
     // ? SensorDirectionValue.Clockwise_Positive
     // : SensorDirectionValue.CounterClockwise_Positive;
 
-    // Configure the CANCoder
-    CANcoderConfiguration cancoderConfig = new CANcoderConfiguration();
-    cancoderConfig.MagnetSensor.MagnetOffset = 0.0;
-    cancoderConfig.MagnetSensor.SensorDirection =
-        turnAbsInverted
-            ? SensorDirectionValue.Clockwise_Positive
-            : SensorDirectionValue.CounterClockwise_Positive;
-
-    turnAbsEncoder.getConfigurator().apply(cancoderConfig);
   }
 
   @Override

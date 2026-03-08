@@ -37,6 +37,11 @@ public class DriveCommands {
   private static final double ANGLE_KD = 0.4;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
+  private static final double POSE_TRANSLATION_KP = 2.2;
+  private static final double POSE_ROTATION_KP = 5.0;
+  private static final double POSE_MAX_LINEAR_SPEED = 1.8;
+  private static final double POSE_POSITION_TOLERANCE_METERS = 0.03;
+  private static final double POSE_ANGLE_TOLERANCE_RAD = Units.degreesToRadians(2.0);
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
@@ -149,6 +154,48 @@ public class DriveCommands {
 
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+  }
+
+  /** Field-relative pose drive command to a fixed target pose. */
+  public static Command driveToPose(Drive drive, Pose2d targetPose) {
+    return Commands.run(
+        () -> {
+          Pose2d currentPose = drive.getPose();
+          Translation2d translationError =
+              targetPose.getTranslation().minus(currentPose.getTranslation());
+          Rotation2d headingError = targetPose.getRotation().minus(currentPose.getRotation());
+
+          if (Math.abs(translationError.getX()) < POSE_POSITION_TOLERANCE_METERS) {
+            translationError = new Translation2d(0.0, translationError.getY());
+          }
+          if (Math.abs(translationError.getY()) < POSE_POSITION_TOLERANCE_METERS) {
+            translationError = new Translation2d(translationError.getX(), 0.0);
+          }
+          if (Math.abs(headingError.getRadians()) < POSE_ANGLE_TOLERANCE_RAD) {
+            headingError = Rotation2d.kZero;
+          }
+
+          double vxMetersPerSec =
+              MathUtil.clamp(
+                  translationError.getX() * POSE_TRANSLATION_KP,
+                  -POSE_MAX_LINEAR_SPEED,
+                  POSE_MAX_LINEAR_SPEED);
+          double vyMetersPerSec =
+              MathUtil.clamp(
+                  translationError.getY() * POSE_TRANSLATION_KP,
+                  -POSE_MAX_LINEAR_SPEED,
+                  POSE_MAX_LINEAR_SPEED);
+          double omega =
+              MathUtil.clamp(
+                  headingError.getRadians() * POSE_ROTATION_KP,
+                  -drive.getMaxAngularSpeedRadPerSec(),
+                  drive.getMaxAngularSpeedRadPerSec());
+
+          drive.runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omega), drive.getRotation()));
+        },
+        drive);
   }
 
   /**
