@@ -15,7 +15,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  public static final double maxSpeedMetersPerSec = 4.2; // max 4.5
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(21.75);
   public static final double wheelBase = Units.inchesToMeters(21.75);
@@ -29,10 +29,10 @@ public class DriveConstants {
       };
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(2.785);
-  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.640);
-  public static final Rotation2d backLeftZeroRotation = new Rotation2d(1.084);
-  public static final Rotation2d backRightZeroRotation = new Rotation2d(-0.044);
+  public static final Rotation2d frontLeftZeroRotation = new Rotation2d(2.833);
+  public static final Rotation2d frontRightZeroRotation = new Rotation2d(0.506);
+  public static final Rotation2d backLeftZeroRotation = new Rotation2d(1.074);
+  public static final Rotation2d backRightZeroRotation = new Rotation2d(2.008);
 
   // Device CAN IDs
   // Device CAN IDs
@@ -57,7 +57,7 @@ public class DriveConstants {
 
   // Drive motor configuration
   public static final int driveMotorCurrentLimit = 50;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(1.5);
+  public static final double wheelRadiusMeters = Units.inchesToMeters(2.0);
   public static final double driveMotorReduction = ((50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0));
   // and 22 spur teeth
   public static final DCMotor driveGearbox = DCMotor.getNEO(1);

@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Filesystem;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
@@ -346,12 +347,15 @@ public class FieldConstants {
         synchronized (this) {
           if (layout == null) {
             try {
-              Path p = Path.of("src", "main", "deploy", "apriltags", "andymark", name + ".json");
+              Path p =
+                  Filesystem.getDeployDirectory()
+                      .toPath()
+                      .resolve(Path.of("apriltags", "andymark", name + ".json"));
 
               layout = new AprilTagFieldLayout(p);
               layoutString = new ObjectMapper().writeValueAsString(layout);
             } catch (IOException e) {
-              throw new RuntimeException(e);
+              throw new RuntimeException("Failed to load AprilTag layout: " + name, e);
             }
           }
         }

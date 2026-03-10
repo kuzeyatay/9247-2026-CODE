@@ -33,7 +33,7 @@ public final class IntakeConstants {
   public static final double armMotionMagicCruiseRotPerSec = 3.0;
   public static final double armMotionMagicAccelRotPerSecSq = 8.0;
 
-  public static final boolean rollerInverted = false;
+  public static final boolean rollerInverted = true;
   public static final int rollerSupplyCurrentLimitAmps = 40;
   public static final double rollerVelocityKp = 0.10;
   public static final double rollerVelocityKi = 0.0;

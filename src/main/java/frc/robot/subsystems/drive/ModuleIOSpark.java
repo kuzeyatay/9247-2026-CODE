@@ -201,14 +201,6 @@ public class ModuleIOSpark implements ModuleIO {
         SparkOdometryThread.getInstance().registerSignal(driveSpark, driveEncoder::getPosition);
     turnPositionQueue =
         SparkOdometryThread.getInstance().registerSignal(turnSpark, turnEncoder::getPosition);
-
-    // Configure CANCoder
-    // CANcoderConfiguration cancoderConfig = DriveConstants.EncoderInitialConfigs;
-    // cancoderConfig.MagnetSensor.MagnetOffset = constants.EncoderOffset;
-    // cancoderConfig.MagnetSensor.SensorDirection = constants.EncoderInverted
-    // ? SensorDirectionValue.Clockwise_Positive
-    // : SensorDirectionValue.CounterClockwise_Positive;
-
   }
 
   @Override

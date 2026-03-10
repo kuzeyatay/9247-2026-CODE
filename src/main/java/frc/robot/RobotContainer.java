@@ -266,7 +266,7 @@ public class RobotContainer {
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
-    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.75));
+    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.50));
     controller
         .a()
         .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
