@@ -171,7 +171,7 @@ public class RobotContainer {
                 driveToPoseUntilReached(alliancePose(allianceShootPoseBlue), 3.5),
                 SuperstructureCommands.intake(intake, indexer)),
             Commands.waitSeconds(0.15),
-            SuperstructureCommands.shootTimed(shooter, indexer, 0.8).withTimeout(2.2))
+            SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.8).withTimeout(2.2))
         .finallyDo((interrupted) -> drive.stop());
   }
 
@@ -266,8 +266,10 @@ public class RobotContainer {
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
-    controller.y().whileTrue(SuperstructureCommands.shootTimed(shooter, indexer, 0.75));
-    controller.a().whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, shooter, indexer));
+    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.75));
+    controller
+        .a()
+        .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
   }
 
   /**

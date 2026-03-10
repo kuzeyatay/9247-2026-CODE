@@ -20,7 +20,7 @@ public final class IndexerConstants {
   public static final double velocityKd = 0.0;
   public static final double velocityKv = 0.10;
 
-  public static final double intakeRpm = 1800.0;
+  public static final double intakeRpm = 1000.0;
   public static final double feedToShooterRpm = 3200.0;
   public static final double reverseRpm = -1200.0;
 }

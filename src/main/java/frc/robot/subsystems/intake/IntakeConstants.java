@@ -4,9 +4,9 @@ public final class IntakeConstants {
   private IntakeConstants() {}
 
   // FIXME: Set your real CAN IDs
-  public static final int armLeaderMotorCanId = 30;
-  public static final int armFollowerMotorCanId = 34;
-  public static final int rollerMotorCanId = 35;
+  public static final int armLeaderMotorCanId = 5;
+  public static final int armFollowerMotorCanId = 1;
+  public static final int rollerMotorCanId = 6;
 
   public static final String canBusName = "rio";
 
@@ -20,6 +20,7 @@ public final class IntakeConstants {
   // Arm angle setpoints (radians)
   public static final double stowAngleRad = Math.toRadians(90.0);
   public static final double intakeAngleRad = Math.toRadians(130.0);
+  public static final double shootAngleRad = Math.toRadians(110.0);
   public static final double minAngleRad = Math.toRadians(0.0);
   public static final double maxAngleRad = Math.toRadians(140.0);
 

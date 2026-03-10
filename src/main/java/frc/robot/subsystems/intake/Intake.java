@@ -50,6 +50,10 @@ public class Intake extends SubsystemBase {
     setAngleRad(intakeAngleRad);
   }
 
+  public void toShootPosition() {
+    setAngleRad(shootAngleRad);
+  }
+
   public void toStowPosition() {
     setAngleRad(stowAngleRad);
   }

@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
@@ -20,6 +21,10 @@ import org.littletonrobotics.junction.Logger;
 public final class SuperstructureCommands {
   private SuperstructureCommands() {}
 
+  private static final double shootSweepMinAngleRad = Math.toRadians(100.0);
+  private static final double shootSweepMaxAngleRad = Math.toRadians(135.0);
+  private static final double shootSweepPeriodSeconds = 2.0;
+
   /** Runs intake + indexer to acquire a note. */
   public static Command intake(Intake intake, Indexer indexer) {
     return Commands.runEnd(
@@ -29,7 +34,6 @@ public final class SuperstructureCommands {
           indexer.setVelocityRpm(IndexerConstants.intakeRpm);
         },
         () -> {
-          intake.toStowPosition();
           intake.stopRoller();
           indexer.stop();
         },
@@ -46,7 +50,6 @@ public final class SuperstructureCommands {
           indexer.setVelocityRpm(IndexerConstants.reverseRpm);
         },
         () -> {
-          intake.toStowPosition();
           intake.stopRoller();
           indexer.stop();
         },
@@ -69,52 +72,77 @@ public final class SuperstructureCommands {
   }
 
   /** Runs shooter and indexer together for teleop hold-to-shoot. */
-  public static Command shoot(Shooter shooter, Indexer indexer) {
+  public static Command shoot(Intake intake, Shooter shooter, Indexer indexer) {
     return Commands.runEnd(
         () -> {
+          intake.setAngleRad(calculateShootSweepAngleRad());
           shooter.setVelocityRpm(ShooterConstants.spinupRpm);
           indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
         },
         () -> {
+          intake.setAngleRad(shootSweepMaxAngleRad);
           shooter.stop();
           indexer.stop();
         },
+        intake,
         shooter,
         indexer);
   }
 
   /** Runs shooter and indexer together using auto-calculated shooter RPM from hub tags. */
-  public static Command shootAutoRpm(Drive drive, Vision vision, Shooter shooter, Indexer indexer) {
+  public static Command shootAutoRpm(
+      Drive drive, Vision vision, Intake intake, Shooter shooter, Indexer indexer) {
     return Commands.runEnd(
         () -> {
+          intake.setAngleRad(calculateShootSweepAngleRad());
           shooter.setVelocityRpm(calculateAutoShooterRpm(drive, vision));
           indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
         },
         () -> {
+          intake.setAngleRad(shootSweepMaxAngleRad);
           shooter.stop();
           indexer.stop();
         },
+        intake,
         shooter,
         indexer);
   }
 
   /** Spins up for a fixed delay, then feeds continuously until interrupted. */
-  public static Command shootTimed(Shooter shooter, Indexer indexer, double spinupSeconds) {
+  public static Command shootTimed(
+      Intake intake, Shooter shooter, Indexer indexer, double spinupSeconds) {
     return Commands.sequence(
-            Commands.run(() -> shooter.setVelocityRpm(ShooterConstants.spinupRpm), shooter)
+            Commands.run(
+                    () -> {
+                      intake.setAngleRad(calculateShootSweepAngleRad());
+                      shooter.setVelocityRpm(ShooterConstants.spinupRpm);
+                    },
+                    intake,
+                    shooter)
                 .withTimeout(spinupSeconds),
             Commands.run(
                 () -> {
+                  intake.setAngleRad(calculateShootSweepAngleRad());
                   shooter.setVelocityRpm(ShooterConstants.spinupRpm);
                   indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
                 },
+                intake,
                 shooter,
                 indexer))
         .finallyDo(
             (interrupted) -> {
+              intake.setAngleRad(shootSweepMaxAngleRad);
               shooter.stop();
               indexer.stop();
             });
+  }
+
+  private static double calculateShootSweepAngleRad() {
+    double timeInCycle = Timer.getFPGATimestamp() % shootSweepPeriodSeconds;
+    double normalized = timeInCycle / shootSweepPeriodSeconds;
+    double midpoint = (shootSweepMinAngleRad + shootSweepMaxAngleRad) / 2.0;
+    double amplitude = (shootSweepMaxAngleRad - shootSweepMinAngleRad) / 2.0;
+    return midpoint + amplitude * Math.sin(2.0 * Math.PI * normalized - Math.PI / 2.0);
   }
 
   private static double calculateAutoShooterRpm(Drive drive, Vision vision) {

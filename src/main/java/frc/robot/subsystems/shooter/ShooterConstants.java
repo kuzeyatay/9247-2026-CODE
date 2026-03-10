@@ -6,8 +6,8 @@ public final class ShooterConstants {
   private ShooterConstants() {}
 
   // FIXME: Set your real CAN IDs
-  public static final int leaderMotorCanId = 32;
-  public static final int followerMotorCanId = 33;
+  public static final int leaderMotorCanId = 8;
+  public static final int followerMotorCanId = 7;
 
   public static final String canBusName = "rio";
 
