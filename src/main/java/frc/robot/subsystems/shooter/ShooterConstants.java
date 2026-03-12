@@ -24,7 +24,7 @@ public final class ShooterConstants {
   public static final double velocityKd = 0.0;
   public static final double velocityKv = 0.12;
 
-  public static final double spinupRpm = 3200.0;
+  public static final double spinupRpm = 3500.0;
   public static final double ampRpm = 1800.0;
 
   // Auto-RPM shot model constants (fixed-angle shooter).
