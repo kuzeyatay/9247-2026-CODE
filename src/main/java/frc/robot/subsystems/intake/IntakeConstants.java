@@ -32,6 +32,10 @@ public final class IntakeConstants {
   // Motion profile (motor-rotations units/sec and units/sec^2)
   public static final double armMotionMagicCruiseRotPerSec = 3.0;
   public static final double armMotionMagicAccelRotPerSecSq = 8.0;
+  public static final double armOpenCurrentAmps = 25.0;
+  public static final double armCloseCurrentAmps = -25.0;
+  public static final double armCurrentControlToleranceRad = Math.toRadians(2.0);
+  public static final double armPeakTorqueCurrentAmps = 80.0;
 
   public static final boolean rollerInverted = true;
   public static final int rollerSupplyCurrentLimitAmps = 40;

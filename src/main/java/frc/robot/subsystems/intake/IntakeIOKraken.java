@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -21,6 +22,7 @@ public class IntakeIOKraken implements IntakeIO {
   private final TalonFX rollerMotor =
       new TalonFX(IntakeConstants.rollerMotorCanId, IntakeConstants.canBusName);
   private final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0.0);
+  private final TorqueCurrentFOC armCurrentRequest = new TorqueCurrentFOC(0.0);
   private final VelocityVoltage rollerVelocityRequest = new VelocityVoltage(0.0);
 
   public IntakeIOKraken() {
@@ -36,6 +38,8 @@ public class IntakeIOKraken implements IntakeIO {
         new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(IntakeConstants.armSupplyCurrentLimitAmps)
             .withSupplyCurrentLimitEnable(true);
+    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = IntakeConstants.armPeakTorqueCurrentAmps;
+    armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -IntakeConstants.armPeakTorqueCurrentAmps;
     armConfig.Slot0 =
         new Slot0Configs()
             .withKP(IntakeConstants.armKp)
@@ -99,6 +103,11 @@ public class IntakeIOKraken implements IntakeIO {
     double clamped =
         Math.max(IntakeConstants.minAngleRad, Math.min(IntakeConstants.maxAngleRad, positionRad));
     armLeaderMotor.setControl(positionRequest.withPosition(armRadToMotorRot(clamped)));
+  }
+
+  @Override
+  public void setArmCurrentAmps(double amps) {
+    armLeaderMotor.setControl(armCurrentRequest.withOutput(amps));
   }
 
   @Override

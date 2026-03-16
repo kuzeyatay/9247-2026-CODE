@@ -8,6 +8,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class IntakeIOSim implements IntakeIO {
+  private enum ArmControlMode {
+    POSITION,
+    CURRENT
+  }
+
   private final SingleJointedArmSim armSim =
       new SingleJointedArmSim(
           DCMotor.getKrakenX60(1),
@@ -20,12 +25,18 @@ public class IntakeIOSim implements IntakeIO {
           stowAngleRad);
   private final PIDController controller = new PIDController(armKp, armKi, armKd);
 
+  private ArmControlMode armControlMode = ArmControlMode.POSITION;
   private double setpointRad = stowAngleRad;
+  private double armCurrentSetpointAmps = 0.0;
   private double rollerVelocitySetpointRps = 0.0;
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    double appliedVolts = controller.calculate(armSim.getAngleRads(), setpointRad);
+    double appliedVolts =
+        switch (armControlMode) {
+          case POSITION -> controller.calculate(armSim.getAngleRads(), setpointRad);
+          case CURRENT -> (armCurrentSetpointAmps / simStallCurrentAmps) * 12.0;
+        };
     armSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     armSim.update(0.02);
 
@@ -42,7 +53,14 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void setPositionRad(double positionRad) {
+    armControlMode = ArmControlMode.POSITION;
     setpointRad = MathUtil.clamp(positionRad, minAngleRad, maxAngleRad);
+  }
+
+  @Override
+  public void setArmCurrentAmps(double amps) {
+    armControlMode = ArmControlMode.CURRENT;
+    armCurrentSetpointAmps = MathUtil.clamp(amps, -simStallCurrentAmps, simStallCurrentAmps);
   }
 
   @Override

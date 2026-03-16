@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 3.5185568181818176,
+        "y": 7.405329545454546
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.922555253672621,
-        "y": 6.533296974130043
+        "x": 4.518556818181819,
+        "y": 7.405329545454546
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.778253012048193,
-        "y": 4.373759036144579
+        "x": 7.9917159090909085,
+        "y": 7.2095
       },
       "prevControl": {
-        "x": 6.965873260883107,
-        "y": 4.783040507017842
+        "x": 6.777343749999999,
+        "y": 7.463752840909091
+      },
+      "nextControl": {
+        "x": 9.206088068181812,
+        "y": 6.955247159090909
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.77503409090909,
+        "y": 2.0663977272727276
+      },
+      "prevControl": {
+        "x": 8.88840909090909,
+        "y": 3.2104545454545463
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,10 +58,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -92.38594403038861
   },
   "reversed": false,
-  "folder": null,
+  "folder": "kuzey",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

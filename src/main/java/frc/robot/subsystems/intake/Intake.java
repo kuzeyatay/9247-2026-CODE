@@ -11,12 +11,20 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 
 public class Intake extends SubsystemBase {
+  private enum ArmControlMode {
+    POSITION,
+    CURRENT_TO_TARGET
+  }
+
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private final LoggedMechanism2d mechanism = new LoggedMechanism2d(1.0, 1.0);
   private final LoggedMechanismLigament2d measuredLigament;
   private final LoggedMechanismLigament2d setpointLigament;
+  private ArmControlMode armControlMode = ArmControlMode.POSITION;
   private double armSetpointRad = stowAngleRad;
+  private double armCurrentTargetRad = stowAngleRad;
+  private double armCurrentCommandAmps = 0.0;
   private double rollerSetpointRpm = 0.0;
 
   public Intake(IntakeIO io) {
@@ -33,8 +41,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void setAngleRad(double angleRad) {
-    armSetpointRad = angleRad;
-    io.setPositionRad(angleRad);
+    armSetpointRad = clampArmAngle(angleRad);
+    armControlMode = ArmControlMode.POSITION;
+    io.setPositionRad(armSetpointRad);
   }
 
   public void setRollerVelocityRpm(double rpm) {
@@ -47,7 +56,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void toIntakePosition() {
-    setAngleRad(intakeAngleRad);
+    setCurrentControlledTarget(intakeAngleRad, armOpenCurrentAmps);
   }
 
   public void toShootPosition() {
@@ -55,7 +64,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void toStowPosition() {
-    setAngleRad(stowAngleRad);
+    setCurrentControlledTarget(stowAngleRad, armCloseCurrentAmps);
   }
 
   public void stop() {
@@ -65,11 +74,41 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    updateCurrentControlledArm();
     measuredLigament.setAngle(Units.radiansToDegrees(inputs.armPositionRad));
     setpointLigament.setAngle(Units.radiansToDegrees(armSetpointRad));
     Logger.processInputs("Intake", inputs);
     Logger.recordOutput("Intake/ArmSetpointRad", armSetpointRad);
+    Logger.recordOutput("Intake/ArmCurrentTargetRad", armCurrentTargetRad);
+    Logger.recordOutput("Intake/ArmCurrentCommandAmps", armCurrentCommandAmps);
+    Logger.recordOutput("Intake/ArmControlMode", armControlMode.name());
     Logger.recordOutput("Intake/RollerSetpointRpm", rollerSetpointRpm);
     Logger.recordOutput("Intake/Mechanism2d", mechanism);
+  }
+
+  private void setCurrentControlledTarget(double targetRad, double currentAmps) {
+    armSetpointRad = clampArmAngle(targetRad);
+    armCurrentTargetRad = armSetpointRad;
+    armCurrentCommandAmps = currentAmps;
+    armControlMode = ArmControlMode.CURRENT_TO_TARGET;
+    updateCurrentControlledArm();
+  }
+
+  private void updateCurrentControlledArm() {
+    if (armControlMode != ArmControlMode.CURRENT_TO_TARGET) {
+      return;
+    }
+
+    double errorRad = armCurrentTargetRad - inputs.armPositionRad;
+    if (Math.abs(errorRad) <= armCurrentControlToleranceRad) {
+      io.setArmCurrentAmps(0.0);
+      return;
+    }
+
+    io.setArmCurrentAmps(Math.copySign(Math.abs(armCurrentCommandAmps), errorRad));
+  }
+
+  private static double clampArmAngle(double angleRad) {
+    return Math.max(minAngleRad, Math.min(maxAngleRad, angleRad));
   }
 }

@@ -3,7 +3,10 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "New Folder"
+    "Begum",
+    "kuzey",
+    "ece",
+    "ilayda"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,

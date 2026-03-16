@@ -8,12 +8,10 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,10 +27,12 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerConstants;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIONeo;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOKraken;
 import frc.robot.subsystems.intake.IntakeIOSim;
@@ -45,7 +45,6 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.util.FieldConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -126,6 +125,7 @@ public class RobotContainer {
         shooter = new Shooter(new ShooterIO() {});
         break;
     }
+    registerNamedCommands();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -145,64 +145,38 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("Center Collect + Return Shoot", centerCollectReturnShootAuto());
+    
 
     // Configure the button bindings
     configureButtonBindings();
   }
 
-  private Command centerCollectReturnShootAuto() {
-    Pose2d centerCollectPoseBlue =
-        new Pose2d(
-            new Translation2d(
-                FieldConstants.LinesVertical.center - 0.35, FieldConstants.LinesHorizontal.center),
-            Rotation2d.kZero);
-    Pose2d allianceShootPoseBlue =
-        new Pose2d(
-            new Translation2d(
-                FieldConstants.Hub.nearFace.getX() - 1.8, FieldConstants.LinesHorizontal.center),
-            Rotation2d.kZero);
+  
+private void registerNamedCommands() {
+    NamedCommands.registerCommand(
+        "AutoUP_StartIntake",
+        Commands.runOnce(
+            () -> {
+              intake.toIntakePosition();
+              intake.setRollerVelocityRpm(IntakeConstants.rollerIntakeRpm);
+              indexer.setVelocityRpm(IndexerConstants.intakeRpm);
+            },
+            intake,
+            indexer));
 
-    return Commands.sequence(
-            Commands.deadline(
-                driveToPoseUntilReached(alliancePose(centerCollectPoseBlue), 4.0),
-                SuperstructureCommands.intake(intake, indexer)),
-            Commands.deadline(
-                driveToPoseUntilReached(alliancePose(allianceShootPoseBlue), 3.5),
-                SuperstructureCommands.intake(intake, indexer)),
-            Commands.waitSeconds(0.15),
-            SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.8).withTimeout(2.2))
-        .finallyDo((interrupted) -> drive.stop());
-  }
+    NamedCommands.registerCommand(
+        "AutoUP_StopIntakeMotors",
+        Commands.runOnce(
+            () -> {
+              intake.stopRoller();
+              indexer.stop();
+            },
+            intake,
+            indexer));
 
-  private Command driveToPoseUntilReached(Pose2d targetPose, double timeoutSeconds) {
-    return DriveCommands.driveToPose(drive, targetPose)
-        .until(() -> atPose(targetPose, 0.20, 8.0))
-        .withTimeout(timeoutSeconds)
-        .andThen(Commands.runOnce(drive::stop, drive));
-  }
-
-  private boolean atPose(
-      Pose2d targetPose, double translationToleranceMeters, double angleToleranceDeg) {
-    Pose2d currentPose = drive.getPose();
-    double translationErrorMeters =
-        currentPose.getTranslation().getDistance(targetPose.getTranslation());
-    double headingErrorDeg =
-        Units.radiansToDegrees(
-            Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians()));
-    return translationErrorMeters <= translationToleranceMeters
-        && headingErrorDeg <= angleToleranceDeg;
-  }
-
-  private Pose2d alliancePose(Pose2d bluePose) {
-    if (DriverStation.getAlliance().orElse(Alliance.Blue) != Alliance.Red) {
-      return bluePose;
-    }
-
-    return new Pose2d(
-        FieldConstants.fieldLength - bluePose.getX(),
-        bluePose.getY(),
-        Rotation2d.fromRadians(Math.PI - bluePose.getRotation().getRadians()));
+    NamedCommands.registerCommand(
+        "AutoUP_ShootTimed",
+        SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.8).withTimeout(8));
   }
 
   /**
@@ -266,7 +240,7 @@ public class RobotContainer {
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
-    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 1));
+    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.50));
     controller
         .a()
         .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));

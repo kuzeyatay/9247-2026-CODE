@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 4.826665011645797,
-        "y": 3.911811768077356
+        "y": 3.9118117680773556
       },
       "isLocked": false,
       "linkedName": null
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 6.723614457831324,
-        "y": 0.8550361445783141
+        "y": 0.8550361445783142
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "ilayda",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 179.09410368158026
