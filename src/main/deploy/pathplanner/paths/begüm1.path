@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.488,
+        "y": 4.0
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.283710742711339,
+        "y": 5.719903302337743
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.406939759036144,
+        "y": 5.717867469879518
+      },
+      "prevControl": {
+        "x": 4.511840595465491,
+        "y": 4.953513127954018
+      },
+      "nextControl": {
+        "x": 6.3795060240963855,
+        "y": 6.548373493975904
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.712686746987952,
+        "y": 7.553722891566265
+      },
+      "prevControl": {
+        "x": 5.789409638554216,
+        "y": 5.980132530120482
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "begüm1.5"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -89.25594079711138
+  },
+  "reversed": false,
+  "folder": "Begum",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.68150005077305
+  },
+  "useDefaultConstraints": true
+}
