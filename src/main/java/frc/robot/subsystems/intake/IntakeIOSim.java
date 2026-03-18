@@ -35,14 +35,28 @@ public class IntakeIOSim implements IntakeIO {
     double appliedVolts =
         switch (armControlMode) {
           case POSITION -> controller.calculate(armSim.getAngleRads(), setpointRad);
-          case CURRENT -> (armCurrentSetpointAmps / simStallCurrentAmps) * 12.0;
+          case CURRENT -> (armCurrentSetpointAmps / armPeakTorqueCurrentAmps) * 12.0;
         };
     armSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     armSim.update(0.02);
 
     inputs.connected = true;
+    inputs.armAbsoluteEncoderConnected = true;
+    inputs.armLeaderAbsoluteEncoderConnected = true;
+    inputs.armFollowerAbsoluteEncoderConnected = true;
     inputs.armPositionRad = armSim.getAngleRads();
     inputs.armVelocityRadPerSec = armSim.getVelocityRadPerSec();
+    inputs.armAbsoluteEncoderPositionRad = inputs.armPositionRad;
+    inputs.armAbsoluteEncoderRawPositionRotations =
+        inputs.armPositionRad / armAbsoluteEncoderPositionFactor;
+    inputs.armLeaderAbsoluteEncoderPositionRad = inputs.armPositionRad;
+    inputs.armFollowerAbsoluteEncoderPositionRad = inputs.armPositionRad;
+    inputs.armLeaderAbsoluteEncoderRawPositionRotations =
+        inputs.armAbsoluteEncoderRawPositionRotations;
+    inputs.armFollowerAbsoluteEncoderRawPositionRotations =
+        inputs.armAbsoluteEncoderRawPositionRotations;
+    inputs.armAbsoluteEncoderSyncErrorRad = 0.0;
+    inputs.armMotorPositionRad = inputs.armPositionRad;
     inputs.rollerVelocityRps = rollerVelocitySetpointRps;
     inputs.positionRad = inputs.armPositionRad;
     inputs.velocityRadPerSec = inputs.armVelocityRadPerSec;
@@ -60,7 +74,8 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void setArmCurrentAmps(double amps) {
     armControlMode = ArmControlMode.CURRENT;
-    armCurrentSetpointAmps = MathUtil.clamp(amps, -simStallCurrentAmps, simStallCurrentAmps);
+    armCurrentSetpointAmps =
+        MathUtil.clamp(amps, -armPeakTorqueCurrentAmps, armPeakTorqueCurrentAmps);
   }
 
   @Override

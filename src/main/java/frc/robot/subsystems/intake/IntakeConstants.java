@@ -12,10 +12,19 @@ public final class IntakeConstants {
 
   public static final boolean armInverted = false;
   public static final boolean armFollowerOpposeLeader = true;
-  // Backward-compatible aliases for any stale references.
-
   public static final int armSupplyCurrentLimitAmps = 40;
   public static final double armGearRatio = 3.12; // Motor rotations per arm rotation
+  public static final int armLeaderAbsoluteEncoderDioChannel = 0;
+  public static final int armFollowerAbsoluteEncoderDioChannel = 1;
+  public static final boolean armLeaderAbsoluteEncoderInverted = false;
+  public static final boolean armFollowerAbsoluteEncoderInverted = true; // Likely opposite side
+  public static final double armAbsoluteEncoderGearRatio = 1.0;
+  public static final double armAbsoluteEncoderPositionFactor =
+      (2.0 * Math.PI) / armAbsoluteEncoderGearRatio; // Encoder rotations -> arm radians
+  public static final double armAbsoluteEncoderVelocityFactor =
+      (2.0 * Math.PI) / armAbsoluteEncoderGearRatio; // Encoder rotations/sec -> arm rad/sec
+  public static final double armLeaderAbsoluteEncoderOffsetRad = 0.0; // Tune on robot
+  public static final double armFollowerAbsoluteEncoderOffsetRad = 0.0; // Tune on robot
 
   // Arm angle setpoints (radians)
   public static final double stowAngleRad = Math.toRadians(90.0);
@@ -32,9 +41,6 @@ public final class IntakeConstants {
   // Motion profile (motor-rotations units/sec and units/sec^2)
   public static final double armMotionMagicCruiseRotPerSec = 3.0;
   public static final double armMotionMagicAccelRotPerSecSq = 8.0;
-  public static final double armOpenCurrentAmps = 25.0;
-  public static final double armCloseCurrentAmps = -25.0;
-  public static final double armCurrentControlToleranceRad = Math.toRadians(2.0);
   public static final double armPeakTorqueCurrentAmps = 80.0;
 
   public static final boolean rollerInverted = true;

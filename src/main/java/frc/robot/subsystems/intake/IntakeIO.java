@@ -6,8 +6,19 @@ public interface IntakeIO {
   @AutoLog
   class IntakeIOInputs {
     public boolean connected = false;
+    public boolean armAbsoluteEncoderConnected = false;
+    public boolean armLeaderAbsoluteEncoderConnected = false;
+    public boolean armFollowerAbsoluteEncoderConnected = false;
     public double armPositionRad = 0.0;
     public double armVelocityRadPerSec = 0.0;
+    public double armAbsoluteEncoderPositionRad = 0.0;
+    public double armAbsoluteEncoderRawPositionRotations = 0.0;
+    public double armLeaderAbsoluteEncoderPositionRad = 0.0;
+    public double armFollowerAbsoluteEncoderPositionRad = 0.0;
+    public double armLeaderAbsoluteEncoderRawPositionRotations = 0.0;
+    public double armFollowerAbsoluteEncoderRawPositionRotations = 0.0;
+    public double armAbsoluteEncoderSyncErrorRad = 0.0;
+    public double armMotorPositionRad = 0.0;
     public double rollerVelocityRps = 0.0;
     public double positionRad = 0.0;
     public double velocityRadPerSec = 0.0;
