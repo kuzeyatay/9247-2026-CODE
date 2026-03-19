@@ -215,12 +215,12 @@ public class IntakeIOKraken implements IntakeIO {
 
   private void runArmControl(double armPositionRad) {
     switch (armControlMode) {
-      case POSITION ->
-          armLeaderMotor.setControl(
-              armVoltageRequest.withOutput(
-                  MathUtil.clamp(
-                      armController.calculate(armPositionRad, armSetpointRad), -12.0, 12.0)));
-      case CURRENT -> armLeaderMotor.setControl(armCurrentRequest.withOutput(armCurrentSetpointAmps));
+      case POSITION -> armLeaderMotor.setControl(
+          armVoltageRequest.withOutput(
+              MathUtil.clamp(
+                  armController.calculate(armPositionRad, armSetpointRad), -12.0, 12.0)));
+      case CURRENT -> armLeaderMotor.setControl(
+          armCurrentRequest.withOutput(armCurrentSetpointAmps));
     }
   }
 
@@ -276,8 +276,7 @@ public class IntakeIOKraken implements IntakeIO {
     double wrappedRotations = MathUtil.inputModulus(absoluteEncoderRotations, 0.0, 1.0);
     double adjustedRotations = inverted ? 1.0 - wrappedRotations : wrappedRotations;
     return MathUtil.inputModulus(
-        adjustedRotations * IntakeConstants.armAbsoluteEncoderPositionFactor
-            - offsetRad,
+        adjustedRotations * IntakeConstants.armAbsoluteEncoderPositionFactor - offsetRad,
         0.0,
         IntakeConstants.armAbsoluteEncoderPositionFactor);
   }
