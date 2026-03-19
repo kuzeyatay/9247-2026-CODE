@@ -15,7 +15,7 @@ public class IntakeIOSim implements IntakeIO {
 
   private final SingleJointedArmSim armSim =
       new SingleJointedArmSim(
-          DCMotor.getKrakenX60(1),
+          DCMotor.getKrakenX60(2),
           armGearRatio,
           SingleJointedArmSim.estimateMOI(simArmLengthMeters, simArmMassKg),
           simArmLengthMeters,
