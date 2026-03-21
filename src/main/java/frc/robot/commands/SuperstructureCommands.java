@@ -80,7 +80,7 @@ public final class SuperstructureCommands {
           indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
         },
         () -> {
-          intake.setAngleRad(shootSweepMaxAngleRad);
+          intake.toIntakePosition();
           shooter.stop();
           indexer.stop();
         },
@@ -99,7 +99,7 @@ public final class SuperstructureCommands {
           indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
         },
         () -> {
-          intake.setAngleRad(shootSweepMaxAngleRad);
+          intake.toIntakePosition();
           shooter.stop();
           indexer.stop();
         },
@@ -131,7 +131,7 @@ public final class SuperstructureCommands {
                 indexer))
         .finallyDo(
             (interrupted) -> {
-              intake.setAngleRad(shootSweepMaxAngleRad);
+              intake.toIntakePosition();
               shooter.stop();
               indexer.stop();
             });

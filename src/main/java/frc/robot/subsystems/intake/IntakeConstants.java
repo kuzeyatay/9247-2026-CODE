@@ -15,23 +15,22 @@ public final class IntakeConstants {
   public static final int armSupplyCurrentLimitAmps = 40;
   public static final double armGearRatio = 4; // Motor rotations per arm rotation
   public static final int armLeaderAbsoluteEncoderDioChannel = 0;
-  public static final int armFollowerAbsoluteEncoderDioChannel = 1;
   public static final boolean armLeaderAbsoluteEncoderInverted = false;
-  public static final boolean armFollowerAbsoluteEncoderInverted = true; // Likely opposite side
   public static final double armAbsoluteEncoderGearRatio = 1.0;
   public static final double armAbsoluteEncoderPositionFactor =
       (2.0 * Math.PI) / armAbsoluteEncoderGearRatio; // Encoder rotations -> arm radians
   public static final double armAbsoluteEncoderVelocityFactor =
       (2.0 * Math.PI) / armAbsoluteEncoderGearRatio; // Encoder rotations/sec -> arm rad/sec
-  public static final double armLeaderAbsoluteEncoderOffsetRad = 0.0; // Tune on robot
-  public static final double armFollowerAbsoluteEncoderOffsetRad = 0.0; // Tune on robot
+  public static final double armLeaderAbsoluteEncoderOffsetRad = 0.0;
 
-  // Arm angle setpoints (radians)
-  public static final double stowAngleRad = Math.toRadians(90.0);
-  public static final double intakeAngleRad = Math.toRadians(130.0);
-  public static final double shootAngleRad = Math.toRadians(110.0);
-  public static final double minAngleRad = Math.toRadians(0.0);
-  public static final double maxAngleRad = Math.toRadians(140.0);
+  // Arm setpoints in leader absolute-encoder radians.
+  public static final double closedAngleRad = 1.740;
+  public static final double openAngleRad = 2.984;
+  public static final double stowAngleRad = closedAngleRad;
+  public static final double intakeAngleRad = openAngleRad;
+  public static final double shootAngleRad = 2.050; // Tune if this preset is used
+  public static final double minAngleRad = closedAngleRad;
+  public static final double maxAngleRad = openAngleRad;
 
   // Closed-loop gains (tune on robot)
   public static final double armKp = 30.0;
