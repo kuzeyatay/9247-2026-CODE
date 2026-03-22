@@ -15,7 +15,7 @@ public final class IntakeConstants {
   public static final int armSupplyCurrentLimitAmps = 40;
   public static final double armGearRatio = 4; // Motor rotations per arm rotation
   public static final int armLeaderAbsoluteEncoderDioChannel = 0;
-  public static final boolean armLeaderAbsoluteEncoderInverted = false;
+  public static final boolean armLeaderAbsoluteEncoderInverted = true;
   public static final double armAbsoluteEncoderGearRatio = 1.0;
   public static final double armAbsoluteEncoderPositionFactor =
       (2.0 * Math.PI) / armAbsoluteEncoderGearRatio; // Encoder rotations -> arm radians
@@ -24,8 +24,8 @@ public final class IntakeConstants {
   public static final double armLeaderAbsoluteEncoderOffsetRad = 0.0;
 
   // Arm setpoints in leader absolute-encoder radians.
-  public static final double closedAngleRad = 1.740;
-  public static final double openAngleRad = 2.984;
+  public static final double closedAngleRad = 1.800; // 1.740
+  public static final double openAngleRad = 2.500; // 2.984
   public static final double stowAngleRad = closedAngleRad;
   public static final double intakeAngleRad = openAngleRad;
   public static final double minAngleRad = closedAngleRad;

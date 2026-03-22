@@ -21,9 +21,9 @@ import org.littletonrobotics.junction.Logger;
 public final class SuperstructureCommands {
   private SuperstructureCommands() {}
 
-  private static final double shootSweepMinAngleRad = IntakeConstants.closedAngleRad;
+  private static final double shootSweepMinAngleRad = Units.degreesToRadians(100);
   private static final double shootSweepMaxAngleRad = IntakeConstants.openAngleRad;
-  private static final double shootSweepPeriodSeconds = 2.0;
+  private static final double shootSweepPeriodSeconds = 3.0;
 
   /** Runs intake + indexer to acquire a note. */
   public static Command intake(Intake intake, Indexer indexer) {
