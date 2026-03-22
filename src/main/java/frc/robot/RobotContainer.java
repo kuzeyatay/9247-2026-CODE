@@ -241,6 +241,7 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
+    controller.povDown().onTrue(Commands.runOnce(intake::toStowPosition, intake));
   }
 
   /**

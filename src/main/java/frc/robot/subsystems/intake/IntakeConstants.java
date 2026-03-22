@@ -28,18 +28,26 @@ public final class IntakeConstants {
   public static final double openAngleRad = 2.984;
   public static final double stowAngleRad = closedAngleRad;
   public static final double intakeAngleRad = openAngleRad;
-  public static final double shootAngleRad = 2.050; // Tune if this preset is used
   public static final double minAngleRad = closedAngleRad;
   public static final double maxAngleRad = openAngleRad;
+  public static final double armHorizontalReferenceRad =
+      closedAngleRad - (Math.PI / 2.0); // Assumes closed is vertical; tune on robot
 
   // Closed-loop gains (tune on robot)
   public static final double armKp = 30.0;
   public static final double armKi = 0.0;
   public static final double armKd = 0.4;
+  public static final double armKsVolts = 0.15;
+  public static final double armKgVolts = 0.35;
+  public static final double armKvVoltsPerRadPerSec = 0.08;
 
   // Motion profile (motor-rotations units/sec and units/sec^2)
   public static final double armMotionMagicCruiseRotPerSec = 3.0;
   public static final double armMotionMagicAccelRotPerSecSq = 8.0;
+  public static final double armProfileCruiseRadPerSec =
+      (armMotionMagicCruiseRotPerSec / armGearRatio) * 2.0 * Math.PI;
+  public static final double armProfileAccelRadPerSecSq =
+      (armMotionMagicAccelRotPerSecSq / armGearRatio) * 2.0 * Math.PI;
   public static final double armPeakTorqueCurrentAmps = 80.0;
 
   public static final boolean rollerInverted = true;

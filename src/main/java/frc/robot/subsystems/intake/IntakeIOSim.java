@@ -3,8 +3,10 @@ package frc.robot.subsystems.intake;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class IntakeIOSim implements IntakeIO {
@@ -18,14 +20,30 @@ public class IntakeIOSim implements IntakeIO {
           maxAngleRad,
           true,
           stowAngleRad);
-  private final PIDController controller = new PIDController(armKp, armKi, armKd);
+  private final ProfiledPIDController controller =
+      new ProfiledPIDController(
+          armKp,
+          armKi,
+          armKd,
+          new TrapezoidProfile.Constraints(armProfileCruiseRadPerSec, armProfileAccelRadPerSecSq));
+  private final ArmFeedforward feedforward =
+      new ArmFeedforward(armKsVolts, armKgVolts, armKvVoltsPerRadPerSec);
 
   private double setpointRad = stowAngleRad;
   private double rollerVelocitySetpointRps = 0.0;
 
+  public IntakeIOSim() {
+    controller.reset(stowAngleRad);
+  }
+
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    double appliedVolts = controller.calculate(armSim.getAngleRads(), setpointRad);
+    double feedbackVolts = controller.calculate(armSim.getAngleRads(), setpointRad);
+    TrapezoidProfile.State profileSetpoint = controller.getSetpoint();
+    double feedforwardVolts =
+        feedforward.calculate(
+            sensorFrameRadToHorizontalRad(profileSetpoint.position), profileSetpoint.velocity);
+    double appliedVolts = feedbackVolts + feedforwardVolts;
     armSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     armSim.update(0.02);
 
@@ -57,5 +75,9 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void setRollerVelocityRpm(double rpm) {
     rollerVelocitySetpointRps = rpm / 60.0;
+  }
+
+  private static double sensorFrameRadToHorizontalRad(double armSensorFrameRad) {
+    return armSensorFrameRad - armHorizontalReferenceRad;
   }
 }

@@ -12,8 +12,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -28,8 +30,19 @@ public class IntakeIOKraken implements IntakeIO {
       new DutyCycleEncoder(IntakeConstants.armLeaderAbsoluteEncoderDioChannel);
   private final VoltageOut armVoltageRequest = new VoltageOut(0.0);
   private final VelocityVoltage rollerVelocityRequest = new VelocityVoltage(0.0);
-  private final PIDController armController =
-      new PIDController(IntakeConstants.armKp, IntakeConstants.armKi, IntakeConstants.armKd);
+  private final ProfiledPIDController armController =
+      new ProfiledPIDController(
+          IntakeConstants.armKp,
+          IntakeConstants.armKi,
+          IntakeConstants.armKd,
+          new TrapezoidProfile.Constraints(
+              IntakeConstants.armProfileCruiseRadPerSec,
+              IntakeConstants.armProfileAccelRadPerSecSq));
+  private final ArmFeedforward armFeedforward =
+      new ArmFeedforward(
+          IntakeConstants.armKsVolts,
+          IntakeConstants.armKgVolts,
+          IntakeConstants.armKvVoltsPerRadPerSec);
   private final Debouncer armAbsoluteEncoderConnectedDebounce = new Debouncer(0.25);
 
   private double armSetpointRad = IntakeConstants.stowAngleRad;
@@ -61,6 +74,7 @@ public class IntakeIOKraken implements IntakeIO {
                 ? MotorAlignmentValue.Opposed
                 : MotorAlignmentValue.Aligned));
     armLeaderMotor.setPosition(armRadToMotorRot(IntakeConstants.stowAngleRad));
+    armController.reset(IntakeConstants.stowAngleRad);
 
     TalonFXConfiguration rollerConfig = new TalonFXConfiguration();
     rollerConfig.MotorOutput =
@@ -152,14 +166,19 @@ public class IntakeIOKraken implements IntakeIO {
 
   private void runArmControl(boolean armAbsoluteEncoderConnected, double armPositionRad) {
     if (!armAbsoluteEncoderConnected) {
-      armController.reset();
+      armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(0.0));
       return;
     }
 
+    double feedbackVolts = armController.calculate(armPositionRad, armSetpointRad);
+    TrapezoidProfile.State profileSetpoint = armController.getSetpoint();
+    double feedforwardVolts =
+        armFeedforward.calculate(
+            sensorFrameRadToHorizontalRad(profileSetpoint.position), profileSetpoint.velocity);
     armLeaderMotor.setControl(
         armVoltageRequest.withOutput(
-            MathUtil.clamp(armController.calculate(armPositionRad, armSetpointRad), -12.0, 12.0)));
+            MathUtil.clamp(feedbackVolts + feedforwardVolts, -12.0, 12.0)));
   }
 
   private void synchronizeArmMotorPosition(double armPositionRad) {
@@ -168,8 +187,12 @@ public class IntakeIOKraken implements IntakeIO {
     }
 
     armLeaderMotor.setPosition(armRadToMotorRot(armPositionRad));
-    armController.reset();
+    armController.reset(armPositionRad);
     armMotorPositionSynchronized = true;
+  }
+
+  private static double sensorFrameRadToHorizontalRad(double armSensorFrameRad) {
+    return armSensorFrameRad - IntakeConstants.armHorizontalReferenceRad;
   }
 
   private static double armRadToMotorRot(double armRad) {
