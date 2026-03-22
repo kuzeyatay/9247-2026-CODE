@@ -46,6 +46,8 @@ public class IntakeIOKraken implements IntakeIO {
   private final Debouncer armAbsoluteEncoderConnectedDebounce = new Debouncer(0.25);
 
   private double armSetpointRad = IntakeConstants.stowAngleRad;
+  private double armVoltageSetpointVolts = 0.0;
+  private boolean armVoltageControlEnabled = false;
   private boolean armMotorPositionSynchronized = false;
   private double lastArmPositionRad = IntakeConstants.stowAngleRad;
   private double lastTimestampSec = Timer.getFPGATimestamp();
@@ -157,6 +159,14 @@ public class IntakeIOKraken implements IntakeIO {
   public void setPositionRad(double positionRad) {
     armSetpointRad =
         Math.max(IntakeConstants.minAngleRad, Math.min(IntakeConstants.maxAngleRad, positionRad));
+    armVoltageControlEnabled = false;
+    armVoltageSetpointVolts = 0.0;
+  }
+
+  @Override
+  public void setArmVoltage(double volts) {
+    armVoltageSetpointVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    armVoltageControlEnabled = true;
   }
 
   @Override
@@ -168,6 +178,12 @@ public class IntakeIOKraken implements IntakeIO {
     if (!armAbsoluteEncoderConnected) {
       armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(0.0));
+      return;
+    }
+
+    if (armVoltageControlEnabled) {
+      armController.reset(armPositionRad);
+      armLeaderMotor.setControl(armVoltageRequest.withOutput(armVoltageSetpointVolts));
       return;
     }
 

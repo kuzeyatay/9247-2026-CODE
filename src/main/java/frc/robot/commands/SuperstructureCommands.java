@@ -24,6 +24,7 @@ public final class SuperstructureCommands {
   private static final double shootSweepMinAngleRad = Units.degreesToRadians(100);
   private static final double shootSweepMaxAngleRad = IntakeConstants.openAngleRad;
   private static final double shootSweepPeriodSeconds = 3.0;
+  private static final double shootSweepVoltageAmplitudeVolts = 4.0;
 
   /** Runs intake + indexer to acquire a note. */
   public static Command intake(Intake intake, Indexer indexer) {
@@ -137,12 +138,49 @@ public final class SuperstructureCommands {
             });
   }
 
+  /**
+   * Spins up for a fixed delay, then feeds continuously while swinging the intake arm by voltage.
+   */
+  public static Command shootTimedVoltage(
+      Intake intake, Shooter shooter, Indexer indexer, double spinupSeconds) {
+    return Commands.sequence(
+            Commands.run(
+                    () -> {
+                      intake.setArmVoltage(calculateShootSweepVoltageVolts());
+                      shooter.setVelocityRpm(ShooterConstants.spinupRpm);
+                    },
+                    intake,
+                    shooter)
+                .withTimeout(spinupSeconds),
+            Commands.run(
+                () -> {
+                  intake.setArmVoltage(calculateShootSweepVoltageVolts());
+                  shooter.setVelocityRpm(ShooterConstants.spinupRpm);
+                  indexer.setVelocityRpm(IndexerConstants.feedToShooterRpm);
+                },
+                intake,
+                shooter,
+                indexer))
+        .finallyDo(
+            (interrupted) -> {
+              intake.toIntakePosition();
+              shooter.stop();
+              indexer.stop();
+            });
+  }
+
   private static double calculateShootSweepAngleRad() {
     double timeInCycle = Timer.getFPGATimestamp() % shootSweepPeriodSeconds;
     double normalized = timeInCycle / shootSweepPeriodSeconds;
     double midpoint = (shootSweepMinAngleRad + shootSweepMaxAngleRad) / 2.0;
     double amplitude = (shootSweepMaxAngleRad - shootSweepMinAngleRad) / 2.0;
     return midpoint + amplitude * Math.sin(2.0 * Math.PI * normalized - Math.PI / 2.0);
+  }
+
+  private static double calculateShootSweepVoltageVolts() {
+    double timeInCycle = Timer.getFPGATimestamp() % shootSweepPeriodSeconds;
+    double normalized = timeInCycle / shootSweepPeriodSeconds;
+    return shootSweepVoltageAmplitudeVolts * Math.sin(2.0 * Math.PI * normalized - Math.PI / 2.0);
   }
 
   private static double calculateAutoShooterRpm(Drive drive, Vision vision) {

@@ -237,11 +237,11 @@ public class RobotContainer {
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
-    controller.y().whileTrue(SuperstructureCommands.shootTimed(intake, shooter, indexer, 0.50));
+    controller.y().whileTrue(SuperstructureCommands.shootTimedVoltage(intake, shooter, indexer, 0.50));
     controller
         .a()
         .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
-    controller.povDown().onTrue(Commands.runOnce(intake::toStowPosition, intake));
+    controller.leftTrigger().onTrue(Commands.runOnce(intake::toStowPosition, intake));
   }
 
   /**

@@ -27,5 +27,7 @@ public interface IntakeIO {
 
   default void setPositionRad(double positionRad) {}
 
+  default void setArmVoltage(double volts) {}
+
   default void setRollerVelocityRpm(double rpm) {}
 }

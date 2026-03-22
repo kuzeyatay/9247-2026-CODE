@@ -17,6 +17,8 @@ public class Intake extends SubsystemBase {
   private final LoggedMechanismLigament2d measuredLigament;
   private final LoggedMechanismLigament2d setpointLigament;
   private double armSetpointRad = stowAngleRad;
+  private double armVoltageSetpointVolts = 0.0;
+  private boolean armVoltageControlEnabled = false;
   private double rollerSetpointRpm = 0.0;
 
   public Intake(IntakeIO io) {
@@ -34,7 +36,15 @@ public class Intake extends SubsystemBase {
 
   public void setAngleRad(double angleRad) {
     armSetpointRad = clampArmAngle(angleRad);
+    armVoltageSetpointVolts = 0.0;
+    armVoltageControlEnabled = false;
     io.setPositionRad(armSetpointRad);
+  }
+
+  public void setArmVoltage(double volts) {
+    armVoltageSetpointVolts = Math.max(-12.0, Math.min(12.0, volts));
+    armVoltageControlEnabled = true;
+    io.setArmVoltage(armVoltageSetpointVolts);
   }
 
   public void setRollerVelocityRpm(double rpm) {
@@ -62,9 +72,12 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     measuredLigament.setAngle(Units.radiansToDegrees(inputs.armPositionRad));
-    setpointLigament.setAngle(Units.radiansToDegrees(armSetpointRad));
+    setpointLigament.setAngle(
+        Units.radiansToDegrees(armVoltageControlEnabled ? inputs.armPositionRad : armSetpointRad));
     Logger.processInputs("Intake", inputs);
     Logger.recordOutput("Intake/ArmSetpointRad", armSetpointRad);
+    Logger.recordOutput("Intake/ArmVoltageControlEnabled", armVoltageControlEnabled);
+    Logger.recordOutput("Intake/ArmVoltageSetpointVolts", armVoltageSetpointVolts);
     Logger.recordOutput("Intake/RollerSetpointRpm", rollerSetpointRpm);
     Logger.recordOutput("Intake/Mechanism2d", mechanism);
   }

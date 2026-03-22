@@ -30,6 +30,8 @@ public class IntakeIOSim implements IntakeIO {
       new ArmFeedforward(armKsVolts, armKgVolts, armKvVoltsPerRadPerSec);
 
   private double setpointRad = stowAngleRad;
+  private double armVoltageSetpointVolts = 0.0;
+  private boolean armVoltageControlEnabled = false;
   private double rollerVelocitySetpointRps = 0.0;
 
   public IntakeIOSim() {
@@ -38,12 +40,18 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    double feedbackVolts = controller.calculate(armSim.getAngleRads(), setpointRad);
-    TrapezoidProfile.State profileSetpoint = controller.getSetpoint();
-    double feedforwardVolts =
-        feedforward.calculate(
-            sensorFrameRadToHorizontalRad(profileSetpoint.position), profileSetpoint.velocity);
-    double appliedVolts = feedbackVolts + feedforwardVolts;
+    double appliedVolts;
+    if (armVoltageControlEnabled) {
+      controller.reset(armSim.getAngleRads());
+      appliedVolts = armVoltageSetpointVolts;
+    } else {
+      double feedbackVolts = controller.calculate(armSim.getAngleRads(), setpointRad);
+      TrapezoidProfile.State profileSetpoint = controller.getSetpoint();
+      double feedforwardVolts =
+          feedforward.calculate(
+              sensorFrameRadToHorizontalRad(profileSetpoint.position), profileSetpoint.velocity);
+      appliedVolts = feedbackVolts + feedforwardVolts;
+    }
     armSim.setInputVoltage(MathUtil.clamp(appliedVolts, -12.0, 12.0));
     armSim.update(0.02);
 
@@ -70,6 +78,14 @@ public class IntakeIOSim implements IntakeIO {
   @Override
   public void setPositionRad(double positionRad) {
     setpointRad = MathUtil.clamp(positionRad, minAngleRad, maxAngleRad);
+    armVoltageControlEnabled = false;
+    armVoltageSetpointVolts = 0.0;
+  }
+
+  @Override
+  public void setArmVoltage(double volts) {
+    armVoltageSetpointVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    armVoltageControlEnabled = true;
   }
 
   @Override
