@@ -10,7 +10,7 @@ public final class IntakeConstants {
 
   public static final String canBusName = "rio";
 
-  public static final boolean armInverted = false;
+  public static final boolean armInverted = true;
   public static final boolean armFollowerOpposeLeader = true;
   public static final int armSupplyCurrentLimitAmps = 40;
   public static final double armGearRatio = 4; // Motor rotations per arm rotation
@@ -24,7 +24,7 @@ public final class IntakeConstants {
   public static final double armLeaderAbsoluteEncoderOffsetRad = 0.0;
 
   // Arm setpoints in leader absolute-encoder radians.
-  public static final double closedAngleRad = 1.800; // 1.740
+  public static final double closedAngleRad = 1.600; // 1.740
   public static final double openAngleRad = 2.500; // 2.984
   public static final double stowAngleRad = closedAngleRad;
   public static final double intakeAngleRad = openAngleRad;

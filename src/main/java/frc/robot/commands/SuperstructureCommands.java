@@ -180,7 +180,7 @@ public final class SuperstructureCommands {
   private static double calculateShootSweepVoltageVolts() {
     double timeInCycle = Timer.getFPGATimestamp() % shootSweepPeriodSeconds;
     double normalized = timeInCycle / shootSweepPeriodSeconds;
-    return shootSweepVoltageAmplitudeVolts * Math.sin(2.0 * Math.PI * normalized - Math.PI / 2.0);
+    return normalized < 0.5 ? shootSweepVoltageAmplitudeVolts : -shootSweepVoltageAmplitudeVolts;
   }
 
   private static double calculateAutoShooterRpm(Drive drive, Vision vision) {

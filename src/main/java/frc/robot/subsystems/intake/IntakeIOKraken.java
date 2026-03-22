@@ -29,7 +29,14 @@ public class IntakeIOKraken implements IntakeIO {
   private final DutyCycleEncoder armAbsoluteEncoder =
       new DutyCycleEncoder(IntakeConstants.armLeaderAbsoluteEncoderDioChannel);
   private final VoltageOut armVoltageRequest = new VoltageOut(0.0);
+  private final VoltageOut armFollowerVoltageRequest = new VoltageOut(0.0);
   private final VelocityVoltage rollerVelocityRequest = new VelocityVoltage(0.0);
+  private final Follower armFollowerRequest =
+      new Follower(
+          IntakeConstants.armLeaderMotorCanId,
+          IntakeConstants.armFollowerOpposeLeader
+              ? MotorAlignmentValue.Opposed
+              : MotorAlignmentValue.Aligned);
   private final ProfiledPIDController armController =
       new ProfiledPIDController(
           IntakeConstants.armKp,
@@ -48,6 +55,7 @@ public class IntakeIOKraken implements IntakeIO {
   private double armSetpointRad = IntakeConstants.stowAngleRad;
   private double armVoltageSetpointVolts = 0.0;
   private boolean armVoltageControlEnabled = false;
+  private boolean armFollowerEnabled = false;
   private boolean armMotorPositionSynchronized = false;
   private double lastArmPositionRad = IntakeConstants.stowAngleRad;
   private double lastTimestampSec = Timer.getFPGATimestamp();
@@ -69,12 +77,7 @@ public class IntakeIOKraken implements IntakeIO {
     armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -IntakeConstants.armPeakTorqueCurrentAmps;
     armLeaderMotor.getConfigurator().apply(armConfig);
     armFollowerMotor.getConfigurator().apply(armConfig);
-    armFollowerMotor.setControl(
-        new Follower(
-            IntakeConstants.armLeaderMotorCanId,
-            IntakeConstants.armFollowerOpposeLeader
-                ? MotorAlignmentValue.Opposed
-                : MotorAlignmentValue.Aligned));
+    enableArmFollower();
     armLeaderMotor.setPosition(armRadToMotorRot(IntakeConstants.stowAngleRad));
     armController.reset(IntakeConstants.stowAngleRad);
 
@@ -176,6 +179,7 @@ public class IntakeIOKraken implements IntakeIO {
 
   private void runArmControl(boolean armAbsoluteEncoderConnected, double armPositionRad) {
     if (!armAbsoluteEncoderConnected) {
+      enableArmFollower();
       armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(0.0));
       return;
@@ -184,9 +188,16 @@ public class IntakeIOKraken implements IntakeIO {
     if (armVoltageControlEnabled) {
       armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(armVoltageSetpointVolts));
+      armFollowerMotor.setControl(
+          armFollowerVoltageRequest.withOutput(
+              IntakeConstants.armFollowerOpposeLeader
+                  ? -armVoltageSetpointVolts
+                  : armVoltageSetpointVolts));
+      armFollowerEnabled = false;
       return;
     }
 
+    enableArmFollower();
     double feedbackVolts = armController.calculate(armPositionRad, armSetpointRad);
     TrapezoidProfile.State profileSetpoint = armController.getSetpoint();
     double feedforwardVolts =
@@ -195,6 +206,15 @@ public class IntakeIOKraken implements IntakeIO {
     armLeaderMotor.setControl(
         armVoltageRequest.withOutput(
             MathUtil.clamp(feedbackVolts + feedforwardVolts, -12.0, 12.0)));
+  }
+
+  private void enableArmFollower() {
+    if (armFollowerEnabled) {
+      return;
+    }
+
+    armFollowerMotor.setControl(armFollowerRequest);
+    armFollowerEnabled = true;
   }
 
   private void synchronizeArmMotorPosition(double armPositionRad) {
