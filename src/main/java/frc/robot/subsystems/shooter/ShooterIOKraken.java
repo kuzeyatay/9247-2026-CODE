@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import static frc.robot.subsystems.shooter.ShooterConstants.*;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -14,8 +15,9 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class ShooterIOKraken implements ShooterIO {
-  private final TalonFX leaderMotor = new TalonFX(leaderMotorCanId, canBusName);
-  private final TalonFX followerMotor = new TalonFX(followerMotorCanId, canBusName);
+  private final CANBus canBus = new CANBus(canBusName);
+  private final TalonFX leaderMotor = new TalonFX(leaderMotorCanId, canBus);
+  private final TalonFX followerMotor = new TalonFX(followerMotorCanId, canBus);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0.0);
 
   public ShooterIOKraken() {

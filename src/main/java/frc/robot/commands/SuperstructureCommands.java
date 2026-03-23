@@ -25,6 +25,8 @@ public final class SuperstructureCommands {
   private static final double shootSweepMaxAngleRad = IntakeConstants.openAngleRad;
   private static final double shootSweepPeriodSeconds = 3.0;
   private static final double shootSweepVoltageAmplitudeVolts = 4.0;
+  private static final double autonomousShootSpinupSeconds = 0.8;
+  private static final double autonomousShootDurationSeconds = 3.0;
 
   /** Runs intake + indexer to acquire a note. */
   public static Command intake(Intake intake, Indexer indexer) {
@@ -167,6 +169,12 @@ public final class SuperstructureCommands {
               shooter.stop();
               indexer.stop();
             });
+  }
+
+  /** Standalone autonomous routine that only shoots the preloaded note. */
+  public static Command autonomousShootOnly(Intake intake, Shooter shooter, Indexer indexer) {
+    return shootTimed(intake, shooter, indexer, autonomousShootSpinupSeconds)
+        .withTimeout(autonomousShootDurationSeconds);
   }
 
   private static double calculateShootSweepAngleRad() {

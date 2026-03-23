@@ -144,6 +144,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Shoot Only Auto", SuperstructureCommands.autonomousShootOnly(intake, shooter, indexer));
 
     // Configure the button bindings
     configureButtonBindings();

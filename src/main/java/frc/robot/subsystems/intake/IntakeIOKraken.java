@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -21,12 +22,11 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 
 public class IntakeIOKraken implements IntakeIO {
-  private final TalonFX armLeaderMotor =
-      new TalonFX(IntakeConstants.armLeaderMotorCanId, IntakeConstants.canBusName);
+  private final CANBus canBus = new CANBus(IntakeConstants.canBusName);
+  private final TalonFX armLeaderMotor = new TalonFX(IntakeConstants.armLeaderMotorCanId, canBus);
   private final TalonFX armFollowerMotor =
-      new TalonFX(IntakeConstants.armFollowerMotorCanId, IntakeConstants.canBusName);
-  private final TalonFX rollerMotor =
-      new TalonFX(IntakeConstants.rollerMotorCanId, IntakeConstants.canBusName);
+      new TalonFX(IntakeConstants.armFollowerMotorCanId, canBus);
+  private final TalonFX rollerMotor = new TalonFX(IntakeConstants.rollerMotorCanId, canBus);
   private final DutyCycleEncoder armAbsoluteEncoder =
       new DutyCycleEncoder(IntakeConstants.armLeaderAbsoluteEncoderDioChannel);
   private final VoltageOut armVoltageRequest = new VoltageOut(0.0).withEnableFOC(false);
