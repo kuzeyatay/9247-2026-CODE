@@ -25,7 +25,7 @@ public final class SuperstructureCommands {
   private static final double shootSweepMaxAngleRad = IntakeConstants.openAngleRad;
   private static final double shootSweepPeriodSeconds = 3.0;
   private static final double shootSweepVoltageAmplitudeVolts = 4.0;
-  private static final double autonomousShootSpinupSeconds = 0.8;
+  private static final double autonomousShootSpinupSeconds = 10;
   private static final double autonomousShootDurationSeconds = 3.0;
 
   /** Runs intake + indexer to acquire a note. */

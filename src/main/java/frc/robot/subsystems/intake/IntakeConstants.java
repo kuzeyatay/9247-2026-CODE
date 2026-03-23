@@ -15,7 +15,7 @@ public final class IntakeConstants {
   public static final int armSupplyCurrentLimitAmps = 40;
   public static final boolean armVoltageModeSupplyCurrentLimitEnable = false;
   public static final int armVoltageModeSupplyCurrentLimitAmps = 80;
-  public static final double armGearRatio = 4; // Motor rotations per arm rotation
+  public static final double armGearRatio = (64.0 / 12.0); // Motor rotations per arm rotation
   public static final int armLeaderAbsoluteEncoderDioChannel = 0;
   public static final boolean armLeaderAbsoluteEncoderInverted = true;
   public static final double armAbsoluteEncoderGearRatio = 1.0;
