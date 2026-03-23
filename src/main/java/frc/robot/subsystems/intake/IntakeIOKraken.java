@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TorqueCurrentConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -28,8 +29,8 @@ public class IntakeIOKraken implements IntakeIO {
       new TalonFX(IntakeConstants.rollerMotorCanId, IntakeConstants.canBusName);
   private final DutyCycleEncoder armAbsoluteEncoder =
       new DutyCycleEncoder(IntakeConstants.armLeaderAbsoluteEncoderDioChannel);
-  private final VoltageOut armVoltageRequest = new VoltageOut(0.0);
-  private final VoltageOut armFollowerVoltageRequest = new VoltageOut(0.0);
+  private final VoltageOut armVoltageRequest = new VoltageOut(0.0).withEnableFOC(false);
+  private final VoltageOut armFollowerVoltageRequest = new VoltageOut(0.0).withEnableFOC(false);
   private final VelocityVoltage rollerVelocityRequest = new VelocityVoltage(0.0);
   private final Follower armFollowerRequest =
       new Follower(
@@ -37,6 +38,22 @@ public class IntakeIOKraken implements IntakeIO {
           IntakeConstants.armFollowerOpposeLeader
               ? MotorAlignmentValue.Opposed
               : MotorAlignmentValue.Aligned);
+  private final CurrentLimitsConfigs armClosedLoopCurrentLimits =
+      new CurrentLimitsConfigs()
+          .withSupplyCurrentLimit(IntakeConstants.armSupplyCurrentLimitAmps)
+          .withSupplyCurrentLimitEnable(true);
+  private final CurrentLimitsConfigs armVoltageModeCurrentLimits =
+      new CurrentLimitsConfigs()
+          .withSupplyCurrentLimit(IntakeConstants.armVoltageModeSupplyCurrentLimitAmps)
+          .withSupplyCurrentLimitEnable(IntakeConstants.armVoltageModeSupplyCurrentLimitEnable);
+  private final TorqueCurrentConfigs armClosedLoopTorqueCurrent =
+      new TorqueCurrentConfigs()
+          .withPeakForwardTorqueCurrent(IntakeConstants.armPeakTorqueCurrentAmps)
+          .withPeakReverseTorqueCurrent(-IntakeConstants.armPeakTorqueCurrentAmps);
+  private final TorqueCurrentConfigs armVoltageModeTorqueCurrent =
+      new TorqueCurrentConfigs()
+          .withPeakForwardTorqueCurrent(IntakeConstants.armVoltageModePeakTorqueCurrentAmps)
+          .withPeakReverseTorqueCurrent(-IntakeConstants.armVoltageModePeakTorqueCurrentAmps);
   private final ProfiledPIDController armController =
       new ProfiledPIDController(
           IntakeConstants.armKp,
@@ -55,6 +72,7 @@ public class IntakeIOKraken implements IntakeIO {
   private double armSetpointRad = IntakeConstants.stowAngleRad;
   private double armVoltageSetpointVolts = 0.0;
   private boolean armVoltageControlEnabled = false;
+  private boolean armVoltageModeLimitsEnabled = false;
   private boolean armFollowerEnabled = false;
   private boolean armMotorPositionSynchronized = false;
   private double lastArmPositionRad = IntakeConstants.stowAngleRad;
@@ -69,12 +87,8 @@ public class IntakeIOKraken implements IntakeIO {
                 IntakeConstants.armInverted
                     ? InvertedValue.Clockwise_Positive
                     : InvertedValue.CounterClockwise_Positive);
-    armConfig.CurrentLimits =
-        new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(IntakeConstants.armSupplyCurrentLimitAmps)
-            .withSupplyCurrentLimitEnable(true);
-    armConfig.TorqueCurrent.PeakForwardTorqueCurrent = IntakeConstants.armPeakTorqueCurrentAmps;
-    armConfig.TorqueCurrent.PeakReverseTorqueCurrent = -IntakeConstants.armPeakTorqueCurrentAmps;
+    armConfig.CurrentLimits = armClosedLoopCurrentLimits;
+    armConfig.TorqueCurrent = armClosedLoopTorqueCurrent;
     armLeaderMotor.getConfigurator().apply(armConfig);
     armFollowerMotor.getConfigurator().apply(armConfig);
     enableArmFollower();
@@ -179,6 +193,7 @@ public class IntakeIOKraken implements IntakeIO {
 
   private void runArmControl(boolean armAbsoluteEncoderConnected, double armPositionRad) {
     if (!armAbsoluteEncoderConnected) {
+      enableArmClosedLoopLimits();
       enableArmFollower();
       armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(0.0));
@@ -186,6 +201,7 @@ public class IntakeIOKraken implements IntakeIO {
     }
 
     if (armVoltageControlEnabled) {
+      enableArmVoltageModeLimits();
       armController.reset(armPositionRad);
       armLeaderMotor.setControl(armVoltageRequest.withOutput(armVoltageSetpointVolts));
       armFollowerMotor.setControl(
@@ -197,6 +213,7 @@ public class IntakeIOKraken implements IntakeIO {
       return;
     }
 
+    enableArmClosedLoopLimits();
     enableArmFollower();
     double feedbackVolts = armController.calculate(armPositionRad, armSetpointRad);
     TrapezoidProfile.State profileSetpoint = armController.getSetpoint();
@@ -206,6 +223,30 @@ public class IntakeIOKraken implements IntakeIO {
     armLeaderMotor.setControl(
         armVoltageRequest.withOutput(
             MathUtil.clamp(feedbackVolts + feedforwardVolts, -12.0, 12.0)));
+  }
+
+  private void enableArmClosedLoopLimits() {
+    if (!armVoltageModeLimitsEnabled) {
+      return;
+    }
+
+    armLeaderMotor.getConfigurator().apply(armClosedLoopCurrentLimits);
+    armLeaderMotor.getConfigurator().apply(armClosedLoopTorqueCurrent);
+    armFollowerMotor.getConfigurator().apply(armClosedLoopCurrentLimits);
+    armFollowerMotor.getConfigurator().apply(armClosedLoopTorqueCurrent);
+    armVoltageModeLimitsEnabled = false;
+  }
+
+  private void enableArmVoltageModeLimits() {
+    if (armVoltageModeLimitsEnabled) {
+      return;
+    }
+
+    armLeaderMotor.getConfigurator().apply(armVoltageModeCurrentLimits);
+    armLeaderMotor.getConfigurator().apply(armVoltageModeTorqueCurrent);
+    armFollowerMotor.getConfigurator().apply(armVoltageModeCurrentLimits);
+    armFollowerMotor.getConfigurator().apply(armVoltageModeTorqueCurrent);
+    armVoltageModeLimitsEnabled = true;
   }
 
   private void enableArmFollower() {
