@@ -42,6 +42,7 @@ public final class IntakeConstants {
   public static final double armKsVolts = 0.15;
   public static final double armKgVolts = 0.35;
   public static final double armKvVoltsPerRadPerSec = 0.08;
+  public static final double armTestLiftVolts = 8.0;
 
   // Motion profile (motor-rotations units/sec and units/sec^2)
   public static final double armMotionMagicCruiseRotPerSec = 3.0;

@@ -245,6 +245,7 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
+    controller.rightTrigger().whileTrue(SuperstructureCommands.armLiftVoltageTest(intake));
     controller.leftTrigger().onTrue(Commands.runOnce(intake::toStowPosition, intake));
   }
 

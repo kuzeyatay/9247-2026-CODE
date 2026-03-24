@@ -171,9 +171,17 @@ public final class SuperstructureCommands {
             });
   }
 
+  /** Applies a fixed open-loop voltage to the intake arm for lift testing. */
+  public static Command armLiftVoltageTest(Intake intake) {
+    return Commands.runEnd(
+        () -> intake.setArmVoltage(IntakeConstants.armTestLiftVolts),
+        intake::toStowPosition,
+        intake);
+  }
+
   /** Standalone autonomous routine that only shoots the preloaded note. */
   public static Command autonomousShootOnly(Intake intake, Shooter shooter, Indexer indexer) {
-    return shootTimed(intake, shooter, indexer, autonomousShootSpinupSeconds)
+    return shootTimedVoltage(intake, shooter, indexer, autonomousShootSpinupSeconds)
         .withTimeout(autonomousShootDurationSeconds);
   }
 
