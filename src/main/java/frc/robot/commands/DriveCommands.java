@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants;
+import frc.robot.util.FieldConstants;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -128,18 +129,25 @@ public class DriveCommands {
               // Get linear velocity
               Translation2d linearVelocity =
                   getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+              double vxMetersPerSec = linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec();
+              double vyMetersPerSec = linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec();
+              double linearSpeedMetersPerSec = Math.hypot(vxMetersPerSec, vyMetersPerSec);
 
               // Calculate angular speed
               double omega =
                   angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+              // Reserve wheel-speed headroom for translation so auto-aim cannot fully starve
+              // driver translational control under combined load.
+              double maxOmegaForTranslation =
+                  drive.getMaxAngularSpeedRadPerSec()
+                      * Math.max(
+                          0.0,
+                          1.0 - (linearSpeedMetersPerSec / drive.getMaxLinearSpeedMetersPerSec()));
+              omega = MathUtil.clamp(omega, -maxOmegaForTranslation, maxOmegaForTranslation);
 
               // Convert to field relative speeds & send command
-              ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                      omega);
+              ChassisSpeeds speeds = new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omega);
               boolean isFlipped =
                   DriverStation.getAlliance().isPresent()
                       && DriverStation.getAlliance().get() == Alliance.Red;
@@ -158,8 +166,14 @@ public class DriveCommands {
 
   /** Field-relative pose drive command to a fixed target pose. */
   public static Command driveToPose(Drive drive, Pose2d targetPose) {
+    return driveToPose(drive, () -> targetPose);
+  }
+
+  /** Field-relative pose drive command to a target pose resolved at runtime. */
+  public static Command driveToPose(Drive drive, Supplier<Pose2d> targetPoseSupplier) {
     return Commands.run(
         () -> {
+          Pose2d targetPose = targetPoseSupplier.get();
           Pose2d currentPose = drive.getPose();
           Translation2d translationError =
               targetPose.getTranslation().minus(currentPose.getTranslation());
@@ -196,6 +210,17 @@ public class DriveCommands {
                   new ChassisSpeeds(vxMetersPerSec, vyMetersPerSec, omega), drive.getRotation()));
         },
         drive);
+  }
+
+  /** Mirrors an alliance-relative target pose onto the red side of the field when needed. */
+  public static Pose2d allianceRelativePose(Pose2d blueAlliancePose) {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) != Alliance.Red) {
+      return blueAlliancePose;
+    }
+    return new Pose2d(
+        FieldConstants.fieldLength - blueAlliancePose.getX(),
+        blueAlliancePose.getY(),
+        blueAlliancePose.getRotation().plus(Rotation2d.fromDegrees(180.0)));
   }
 
   /**

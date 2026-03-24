@@ -10,7 +10,7 @@ public final class IndexerConstants {
   public static final boolean inverted = true;
   public static final boolean followerOpposeLeader = true;
   public static final int supplyCurrentLimitAmps = 35;
-  public static final double indexerGearRatio = 24.0 / 15.0; // motor rotations per indexer rotation
+  public static final double indexerGearRatio = 36.0 / 15.0; // motor rotations per indexer rotation
   public static final double simFreeSpeedRps = 70.0;
   public static final double simStallCurrentAmps = 55.0;
 

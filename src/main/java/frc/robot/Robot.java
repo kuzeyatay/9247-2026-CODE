@@ -8,8 +8,14 @@
 package frc.robot;
 
 import com.revrobotics.util.StatusLogger;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.HubShiftUtil;
+import java.util.Locale;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -27,6 +33,7 @@ import org.littletonrobotics.urcl.URCL;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private final Field2d elasticField = new Field2d();
 
   public Robot() {
     // Record metadata
@@ -75,6 +82,7 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+    SmartDashboard.putData("Elastic/Field", elasticField);
   }
 
   /** This function is called periodically during all modes. */
@@ -90,9 +98,38 @@ public class Robot extends LoggedRobot {
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    logElasticDashboardData();
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+  }
+
+  private void logElasticDashboardData() {
+    double matchTimeSeconds = Math.max(0.0, DriverStation.getMatchTime());
+    HubShiftUtil.ShiftInfo hubShiftInfo = HubShiftUtil.getOfficialShiftInfo();
+    Pose2d robotPose = robotContainer.getRobotPose();
+
+    SmartDashboard.putNumber("Elastic/MatchTimeSeconds", matchTimeSeconds);
+    SmartDashboard.putString("Elastic/MatchTimeFormatted", formatMatchTime(matchTimeSeconds));
+    SmartDashboard.putBoolean("Elastic/CurrentAllianceHubActive", hubShiftInfo.active());
+    SmartDashboard.putString(
+        "Elastic/CurrentAllianceHubColor", hubShiftInfo.active() ? "#00FF00" : "#FF0000");
+    SmartDashboard.putString("Elastic/FMSGameData", DriverStation.getGameSpecificMessage());
+    SmartDashboard.putString("Elastic/CurrentHubShift", hubShiftInfo.currentShift().name());
+    SmartDashboard.putNumber("Elastic/CurrentHubShiftElapsed", hubShiftInfo.elapsedTime());
+    SmartDashboard.putNumber("Elastic/CurrentHubShiftRemaining", hubShiftInfo.remainingTime());
+    SmartDashboard.putNumber("Elastic/RobotPoseX", robotPose.getX());
+    SmartDashboard.putNumber("Elastic/RobotPoseY", robotPose.getY());
+    SmartDashboard.putNumber("Elastic/RobotHeadingDegrees", robotPose.getRotation().getDegrees());
+
+    elasticField.setRobotPose(robotPose);
+  }
+
+  private static String formatMatchTime(double matchTimeSeconds) {
+    int totalSeconds = (int) Math.max(0.0, Math.ceil(matchTimeSeconds));
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+    return String.format(Locale.ROOT, "%d:%02d", minutes, seconds);
   }
 
   /** This function is called once when the robot is disabled. */
@@ -106,6 +143,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    HubShiftUtil.initialize();
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -121,6 +159,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    HubShiftUtil.initialize();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

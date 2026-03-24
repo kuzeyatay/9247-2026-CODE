@@ -13,6 +13,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -65,6 +67,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final SendableChooser<SuperstructureCommands.SmartShootMode> smartShootModeChooser =
+      new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -103,7 +107,9 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSim());
         shooter = new Shooter(new ShooterIOSim());
@@ -128,6 +134,11 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    smartShootModeChooser.setDefaultOption(
+        "Auto Hub", SuperstructureCommands.SmartShootMode.AUTO_HUB);
+    smartShootModeChooser.addOption(
+        "Fixed Preset", SuperstructureCommands.SmartShootMode.FIXED_PRESET);
+    SmartDashboard.putData("Smart Shoot Mode", smartShootModeChooser);
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -235,7 +246,11 @@ public class RobotContainer {
     controller
         .leftBumper()
         .whileTrue(
-            DriveCommands.driveToPose(drive, new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(-180.0))));
+            DriveCommands.driveToPose(
+                drive,
+                () ->
+                    DriveCommands.allianceRelativePose(
+                        new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(-180.0)))));
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
     // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
@@ -244,9 +259,19 @@ public class RobotContainer {
         .whileTrue(SuperstructureCommands.shootTimedVoltage(intake, shooter, indexer, 0.50));
     controller
         .a()
-        .whileTrue(SuperstructureCommands.shootAutoRpm(drive, vision, intake, shooter, indexer));
+        .whileTrue(
+            SuperstructureCommands.shootAutoRpm(
+                drive,
+                vision,
+                intake,
+                shooter,
+                indexer,
+                () ->
+                    smartShootModeChooser.getSelected() != null
+                        ? smartShootModeChooser.getSelected()
+                        : SuperstructureCommands.SmartShootMode.AUTO_HUB));
     controller.rightTrigger().whileTrue(SuperstructureCommands.armLiftVoltageTest(intake));
-    controller.leftTrigger().onTrue(Commands.runOnce(intake::toStowPosition, intake));
+    // controller.leftTrigger().onTrue(Commands.runOnce(intake::toStowPosition, intake));
   }
 
   /**
@@ -256,5 +281,9 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public Pose2d getRobotPose() {
+    return drive.getPose();
   }
 }
