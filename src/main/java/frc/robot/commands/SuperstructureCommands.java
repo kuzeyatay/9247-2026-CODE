@@ -51,9 +51,9 @@ public final class SuperstructureCommands {
   private static final double shootSweepMinAngleRad = Units.degreesToRadians(100);
   private static final double shootSweepMaxAngleRad = IntakeConstants.openAngleRad;
   private static final double shootSweepPeriodSeconds = 3.0;
-  private static final double shootSweepVoltageAmplitudeVolts = 4.0;
-  private static final double autonomousShootSpinupSeconds = 10;
-  private static final double autonomousShootDurationSeconds = 3.0;
+  private static final double shootSweepVoltageAmplitudeVolts = 6.0;
+  private static final double autonomousShootSpinupSeconds = 1;
+  private static final double autonomousShootDurationSeconds = 10.0;
   private static final double smartShootTransitionWidthMeters = 0.60;
 
   /** Runs intake + indexer to acquire a note. */
@@ -73,19 +73,22 @@ public final class SuperstructureCommands {
   }
 
   /** Reverses intake + indexer to clear a jam. */
-  public static Command outtake(Intake intake, Indexer indexer) {
+  public static Command outtake(Intake intake, Indexer indexer, Shooter shooter) {
     return Commands.runEnd(
         () -> {
           intake.toIntakePosition();
           intake.setRollerVelocityRpm(IntakeConstants.rollerOuttakeRpm);
           indexer.setVelocityRpm(IndexerConstants.reverseRpm);
+          shooter.setVelocityRpm(-3000);
         },
         () -> {
           intake.stopRoller();
           indexer.stop();
+          shooter.stop();
         },
         intake,
-        indexer);
+        indexer,
+        shooter);
   }
 
   /** Spins shooter only (no feed). */

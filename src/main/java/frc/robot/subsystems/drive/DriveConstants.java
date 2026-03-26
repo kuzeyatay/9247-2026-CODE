@@ -15,7 +15,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.0; // max 4.5
+  public static final double maxSpeedMetersPerSec = 4.3; // max 4.5
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(21.75);
   public static final double wheelBase = Units.inchesToMeters(21.75);
@@ -56,7 +56,7 @@ public class DriveConstants {
   public static final int backRightTurnAbsId = 21;
 
   // Drive motor configuration
-  public static final int driveMotorCurrentLimit = 50;
+  public static final int driveMotorCurrentLimit = 60;
   public static final double wheelRadiusMeters = Units.inchesToMeters(2.0);
   public static final double driveMotorReduction = ((50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0));
   // and 22 spur teeth

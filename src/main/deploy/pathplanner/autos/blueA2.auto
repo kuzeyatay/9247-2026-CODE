@@ -1,0 +1,25 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "blue2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoUP_ShootTimed"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "bluealliance(shoot)",
+  "choreoAuto": false
+}

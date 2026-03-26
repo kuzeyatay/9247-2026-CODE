@@ -12,7 +12,7 @@
         "y": 4.309609388415213
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "ece1"
     },
     {
       "anchor": {
@@ -45,7 +45,7 @@
     "rotation": -91.33846412700485
   },
   "reversed": false,
-  "folder": "ece",
+  "folder": "ece(blue)",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -178.71539518877645

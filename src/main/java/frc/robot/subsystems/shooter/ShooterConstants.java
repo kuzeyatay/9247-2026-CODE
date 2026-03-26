@@ -24,7 +24,7 @@ public final class ShooterConstants {
   public static final double velocityKd = 0.0;
   public static final double velocityKv = 0.12;
 
-  public static final double spinupRpm = 3500.0;
+  public static final double spinupRpm = 2800.0;
   public static final double ampRpm = 1800.0;
   public static final double smartShootFixedPresetRpm = spinupRpm;
   public static final double smartShootReadyToleranceRpm = 100.0;
@@ -39,30 +39,30 @@ public final class ShooterConstants {
 
   private static InterpolatingDoubleTreeMap createAutoHubRpmLookup() {
     InterpolatingDoubleTreeMap table = new InterpolatingDoubleTreeMap();
-    table.put(1.00, 1620.0);
-    table.put(1.50, 1820.0);
-    table.put(2.00, 2020.0);
-    table.put(2.50, 2200.0);
-    table.put(3.00, 2380.0);
-    table.put(3.50, 2550.0);
-    table.put(4.00, 2710.0);
-    table.put(4.50, 2870.0);
-    table.put(5.00, 3020.0);
-    table.put(5.50, 3170.0);
-    table.put(6.00, 3310.0);
+    table.put(1.00, 2500.0);
+    table.put(1.60, 2800.0);
+    table.put(2.20, 3100.0);
+    table.put(2.80, 3400.0);
+    table.put(3.40, 3700.0);
+    table.put(4.00, 4000.0);
+    table.put(4.60, 4300.0);
+    table.put(5.20, 4600.0);
+    table.put(5.80, 4900.0);
+    table.put(6.40, 5200.0);
+    table.put(7.00, 5600.0);
     return table;
   }
 
   private static InterpolatingDoubleTreeMap createRemotePassRpmLookup() {
     InterpolatingDoubleTreeMap table = new InterpolatingDoubleTreeMap();
     table.put(0.00, 1500.0);
-    table.put(1.00, 1500.0);
-    table.put(2.10, 2000.0);
-    table.put(4.13, 2800.0);
-    table.put(6.17, 3450.0);
-    table.put(7.70, 4600.0);
-    table.put(9.60, 5500.0);
-    table.put(11.00, 6000.0);
+    table.put(1.00, 2000.0);
+    table.put(2.10, 2500.0);
+    table.put(4.13, 3000.0);
+    table.put(6.17, 3500.0);
+    table.put(7.70, 4000.0);
+    table.put(9.60, 4500.0);
+    table.put(11.00, 5000.0);
     return table;
   }
 }

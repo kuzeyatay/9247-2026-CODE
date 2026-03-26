@@ -12,9 +12,9 @@ public final class IntakeConstants {
 
   public static final boolean armInverted = true;
   public static final boolean armFollowerOpposeLeader = true;
-  public static final int armSupplyCurrentLimitAmps = 40;
+  public static final int armSupplyCurrentLimitAmps = 50;
   public static final boolean armVoltageModeSupplyCurrentLimitEnable = false;
-  public static final int armVoltageModeSupplyCurrentLimitAmps = 80;
+  public static final int armVoltageModeSupplyCurrentLimitAmps = 40;
   public static final double armGearRatio = (64.0 / 12.0); // Motor rotations per arm rotation
   public static final int armLeaderAbsoluteEncoderDioChannel = 0;
   public static final boolean armLeaderAbsoluteEncoderInverted = true;
@@ -42,7 +42,7 @@ public final class IntakeConstants {
   public static final double armKsVolts = 0.15;
   public static final double armKgVolts = 0.35;
   public static final double armKvVoltsPerRadPerSec = 0.08;
-  public static final double armTestLiftVolts = 8.0;
+  public static final double armTestLiftVolts = -8.0;
 
   // Motion profile (motor-rotations units/sec and units/sec^2)
   public static final double armMotionMagicCruiseRotPerSec = 3.0;
@@ -55,13 +55,13 @@ public final class IntakeConstants {
   public static final double armVoltageModePeakTorqueCurrentAmps = 160.0;
 
   public static final boolean rollerInverted = true;
-  public static final int rollerSupplyCurrentLimitAmps = 40;
+  public static final int rollerSupplyCurrentLimitAmps = 30;
   public static final double rollerVelocityKp = 0.10;
   public static final double rollerVelocityKi = 0.0;
   public static final double rollerVelocityKd = 0.0;
   public static final double rollerVelocityKv = 0.12;
-  public static final double rollerIntakeRpm = 2400.0;
-  public static final double rollerOuttakeRpm = -1200.0;
+  public static final double rollerIntakeRpm = 4500.0;
+  public static final double rollerOuttakeRpm = -3000.0;
 
   // Sim properties
   public static final double simArmLengthMeters = 0.35;

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.734,
-        "y": 4.561
+        "x": 6.969602409638553,
+        "y": 4.559530120481927
       },
       "isLocked": false,
       "linkedName": "begüm2.5"
@@ -48,16 +48,16 @@
     },
     {
       "anchor": {
-        "x": 2.323,
-        "y": 5.004
+        "x": 2.2,
+        "y": 4.0
       },
       "prevControl": {
-        "x": 2.3301679574407164,
-        "y": 5.253897219644653
+        "x": 2.2071679574407166,
+        "y": 4.249897219644653
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "blue2end"
     }
   ],
   "rotationTargets": [],
@@ -74,10 +74,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -26.643612594988205
+    "rotation": 0.17227819163841404
   },
   "reversed": false,
-  "folder": "Begum",
+  "folder": "begüm(blue)",
   "idealStartingState": {
     "velocity": 0,
     "rotation": -88.94754159273977

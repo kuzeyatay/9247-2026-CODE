@@ -32,32 +32,32 @@
     },
     {
       "anchor": {
-        "x": 3.636650602409638,
-        "y": 2.472337349397591
+        "x": 3.789638554216867,
+        "y": 2.352132530120481
       },
       "prevControl": {
-        "x": 4.379734939759036,
-        "y": 2.0898674698795188
+        "x": 4.510867469879519,
+        "y": 2.5160481927710827
       },
       "nextControl": {
-        "x": 3.310133736951892,
-        "y": 2.6403975007361367
+        "x": 3.4315410400261768,
+        "y": 2.270746731440779
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.729650602409638,
-        "y": 2.996867469879518
+        "x": 2.2,
+        "y": 2.0
       },
       "prevControl": {
-        "x": 2.612922879518965,
-        "y": 3.2179435624557127
+        "x": 2.083272277109327,
+        "y": 2.2210760925761948
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "blue3end"
     }
   ],
   "rotationTargets": [],
@@ -74,10 +74,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 24.443954780416558
+    "rotation": 29.9536081678015
   },
   "reversed": false,
-  "folder": "ilayda",
+  "folder": "ilayda(blue)",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 90.0

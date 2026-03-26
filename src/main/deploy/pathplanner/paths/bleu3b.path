@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.734,
-        "y": 7.395
+        "x": 2.2,
+        "y": 2.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.9796961585743365,
-        "y": 7.453279503862453
+        "x": 3.2,
+        "y": 2.0
       },
       "isLocked": false,
-      "linkedName": "ece1.5"
+      "linkedName": "blue3end"
     },
     {
       "anchor": {
-        "x": 7.734,
-        "y": 4.561
+        "x": 3.488,
+        "y": 2.0
       },
       "prevControl": {
-        "x": 7.630934375668417,
-        "y": 5.225573528667912
+        "x": 2.488,
+        "y": 2.0
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ece2.5"
+      "linkedName": "ilayda1"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -88.90937280666849
+    "rotation": 179.09410368158026
   },
   "reversed": false,
-  "folder": "ece(blue)",
+  "folder": "bağlantı yerleri",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -91.33846412700485
+    "rotation": 29.9536081678015
   },
   "useDefaultConstraints": true
 }

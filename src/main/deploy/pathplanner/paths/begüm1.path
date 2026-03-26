@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.488,
+        "x": 3.5,
         "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.283710742711339,
+        "x": 2.2957107427113397,
         "y": 5.719903302337743
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "begüm1"
     },
     {
       "anchor": {
@@ -61,10 +61,10 @@
     "rotation": -89.25594079711138
   },
   "reversed": false,
-  "folder": "Begum",
+  "folder": "begüm(blue)",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.68150005077305
+    "rotation": -1.109613950656178
   },
   "useDefaultConstraints": true
 }

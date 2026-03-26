@@ -57,7 +57,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Vision vision;
+  //private final Vision vision;
   private final Intake intake;
   private final Indexer indexer;
   private final Shooter shooter;
@@ -83,11 +83,11 @@ public class RobotContainer {
                 new ModuleIOSpark(2),
                 new ModuleIOSpark(3));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+        //         new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
         intake = new Intake(new IntakeIOKraken());
         indexer = new Indexer(new IndexerIONeo());
         shooter = new Shooter(new ShooterIOKraken());
@@ -103,13 +103,13 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim());
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose),
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim(
+        //             VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose),
+        //         new VisionIOPhotonVisionSim(
+        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSim());
         shooter = new Shooter(new ShooterIOSim());
@@ -124,7 +124,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        //vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIO() {});
@@ -200,9 +200,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> controller.getLeftY(),
+            () -> controller.getLeftX(),
+            () -> controller.getRightX()));
 
     // Lock to 0° when A button is held
     //     controller
@@ -228,20 +228,20 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller
-        .rightBumper()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> {
-                  if (vision.hasAllowedAlignTarget()) {
-                    Rotation2d tx = vision.getAllowedAlignTargetX();
-                    return drive.getRotation().minus(tx);
-                  }
-                  return drive.getRotation();
-                }));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> {
+    //               if (vision.hasAllowedAlignTarget()) {
+    //                 Rotation2d tx = vision.getAllowedAlignTargetX();
+    //                 return drive.getRotation().minus(tx);
+    //               }
+    //               return drive.getRotation();
+    //             }));
 
     controller
         .leftBumper()
@@ -253,24 +253,24 @@ public class RobotContainer {
                         new Pose2d(3.0, 4.0, Rotation2d.fromDegrees(-180.0)))));
 
     controller.x().whileTrue(SuperstructureCommands.intake(intake, indexer));
-    // controller.x().whileTrue(SuperstructureCommands.outtake(intake, indexer));
+    controller.povDown().whileTrue(SuperstructureCommands.outtake(intake, indexer, shooter));
     controller
         .y()
-        .whileTrue(SuperstructureCommands.shootTimedVoltage(intake, shooter, indexer, 0.50));
-    controller
-        .a()
-        .whileTrue(
-            SuperstructureCommands.shootAutoRpm(
-                drive,
-                vision,
-                intake,
-                shooter,
-                indexer,
-                () ->
-                    smartShootModeChooser.getSelected() != null
-                        ? smartShootModeChooser.getSelected()
-                        : SuperstructureCommands.SmartShootMode.AUTO_HUB));
-    controller.rightTrigger().whileTrue(SuperstructureCommands.armLiftVoltageTest(intake));
+        .whileTrue(SuperstructureCommands.shootTimedVoltage(intake, shooter, indexer, 1.0));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         SuperstructureCommands.shootAutoRpm(
+    //             drive,
+    //             vision,
+    //             intake,
+    //             shooter,
+    //             indexer,
+    //             () ->
+    //                 smartShootModeChooser.getSelected() != null
+    //                     ? smartShootModeChooser.getSelected()
+    //                     : SuperstructureCommands.SmartShootMode.AUTO_HUB));
+    // controller.rightTrigger().whileTrue(SuperstructureCommands.armLiftVoltageTest(intake));
     // controller.leftTrigger().onTrue(Commands.runOnce(intake::toStowPosition, intake));
   }
 

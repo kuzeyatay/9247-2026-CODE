@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.734,
-        "y": 7.395
+        "x": 2.2,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.9796961585743365,
-        "y": 7.453279503862453
+        "x": 2.449914880226828,
+        "y": 4.006523238552306
       },
       "isLocked": false,
-      "linkedName": "ece1.5"
+      "linkedName": "blue2end"
     },
     {
       "anchor": {
-        "x": 7.734,
-        "y": 4.561
+        "x": 3.5,
+        "y": 4.0
       },
       "prevControl": {
-        "x": 7.630934375668417,
-        "y": 5.225573528667912
+        "x": 3.2203488878366695,
+        "y": 3.9925166780550048
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "ece2.5"
+      "linkedName": "begüm1"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -88.90937280666849
+    "rotation": -1.109613950656178
   },
   "reversed": false,
-  "folder": "ece(blue)",
+  "folder": "bağlantı yerleri",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -91.33846412700485
+    "rotation": 0.17227819163841404
   },
   "useDefaultConstraints": true
 }
