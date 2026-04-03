@@ -1,15 +1,9 @@
-// Copyright 2021-2025 FRC 6328
+// Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
 
 package frc.robot.subsystems.vision;
 
@@ -65,15 +59,6 @@ public class Vision extends SubsystemBase {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
-  /** Returns whether this camera currently sees one of the allowed align tags. */
-  public boolean hasAllowedAlignTarget(int cameraIndex) {
-    if (cameraIndex < 0 || cameraIndex >= inputs.length) {
-      return false;
-    }
-    return inputs[cameraIndex].hasTarget
-        && FieldConstants.hubAlignTagIds.contains(inputs[cameraIndex].latestTargetId);
-  }
-
   /** Returns whether any camera currently sees one of the allowed align tags. */
   public boolean hasAllowedAlignTarget() {
     return getAllowedAlignTargetCameraIndex() >= 0;
@@ -85,47 +70,12 @@ public class Vision extends SubsystemBase {
     return index >= 0 ? inputs[index].latestTargetObservation.tx() : Rotation2d.kZero;
   }
 
-  /** Returns horizontal distance from robot pose to the visible allowed align tag, in meters. */
-  public double getAllowedAlignTargetDistanceMeters(Pose2d robotPose) {
-    int index = getAllowedAlignTargetCameraIndex();
-    if (index < 0) {
-      return Double.NaN;
-    }
-    var tagPose = aprilTagLayout.getTagPose(inputs[index].latestTargetId);
-    if (tagPose.isEmpty()) {
-      return Double.NaN;
-    }
-    return robotPose.getTranslation().getDistance(tagPose.get().toPose2d().getTranslation());
-  }
-
-  /** Returns height of the visible allowed align tag in meters above field zero. */
-  public double getAllowedAlignTargetHeightMeters() {
-    int index = getAllowedAlignTargetCameraIndex();
-    if (index < 0) {
-      return Double.NaN;
-    }
-    var tagPose = aprilTagLayout.getTagPose(inputs[index].latestTargetId);
-    return tagPose.isPresent() ? tagPose.get().getZ() : Double.NaN;
-  }
-
-  /** Returns field-relative bearing from robot to the visible allowed align tag. */
-  public Rotation2d getAllowedAlignTargetBearing(Pose2d robotPose) {
-    int index = getAllowedAlignTargetCameraIndex();
-    if (index < 0) {
-      return Rotation2d.kZero;
-    }
-    var tagPose = aprilTagLayout.getTagPose(inputs[index].latestTargetId);
-    if (tagPose.isEmpty()) {
-      return Rotation2d.kZero;
-    }
-    var delta = tagPose.get().toPose2d().getTranslation().minus(robotPose.getTranslation());
-    return new Rotation2d(delta.getX(), delta.getY());
-  }
-
   private int getAllowedAlignTargetCameraIndex() {
     for (int i = 0; i < inputs.length; i++) {
-      if (hasAllowedAlignTarget(i)) {
-        return i;
+      for (int tagId : inputs[i].tagIds) {
+        if (FieldConstants.hubAlignTagIds.contains(tagId)) {
+          return i;
+        }
       }
     }
     return -1;
@@ -213,19 +163,19 @@ public class Vision extends SubsystemBase {
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
 
-      // Log camera datadata
+      // Log camera metadata
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-          tagPoses.toArray(new Pose3d[tagPoses.size()]));
+          tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
-          robotPoses.toArray(new Pose3d[robotPoses.size()]));
+          robotPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
-          robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
+          robotPosesAccepted.toArray(new Pose3d[0]));
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
-          robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
+          robotPosesRejected.toArray(new Pose3d[0]));
       allTagPoses.addAll(tagPoses);
       allRobotPoses.addAll(robotPoses);
       allRobotPosesAccepted.addAll(robotPosesAccepted);
@@ -233,21 +183,17 @@ public class Vision extends SubsystemBase {
     }
 
     // Log summary data
+    Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
+    Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
     Logger.recordOutput(
-        "Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+        "Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
     Logger.recordOutput(
-        "Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[allRobotPoses.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesAccepted",
-        allRobotPosesAccepted.toArray(new Pose3d[allRobotPosesAccepted.size()]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesRejected",
-        allRobotPosesRejected.toArray(new Pose3d[allRobotPosesRejected.size()]));
+        "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
   @FunctionalInterface
-  public interface VisionConsumer {
-    void accept(
+  public static interface VisionConsumer {
+    public void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs);
